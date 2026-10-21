@@ -2,7 +2,9 @@
 
 import React, { useState, useRef, useEffect, RefObject } from "react";
 import { useRouter } from "next/navigation";
-import { Search, MapPin, User, Ticket, X } from "lucide-react";
+import SearchBar from "@/components/search/SearchBar";
+
+import GradientIcon from "@/components/icon/GradientIcon";
 
 const KOTA_LIST: string[] = [
   "Jakarta",
@@ -35,7 +37,7 @@ type GroupedKota = Record<string, string[]>;
 
 // Gradasi yang sama dipakai di tombol Akun & border search bar biar konsisten
 const AKUN_GRADIENT = "linear-gradient(90deg,#E91E8C 0%,#4C1D95 100%)";
-// Gradasi khusus border search bar (ungu -> pink), sesuai desain referensi
+// Gradasi khusus border (ungu -> pink)
 const SEARCH_BORDER_GRADIENT = "linear-gradient(90deg,#7C3AED 0%,#E91E8C 100%)";
 
 function groupByLetter(list: string[]): GroupedKota {
@@ -64,8 +66,6 @@ function useOutsideClose<T extends HTMLElement>(
 
 export default function LandingNavbar() {
   const router = useRouter();
-
-  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const [pembelianOpen, setPembelianOpen] = useState<boolean>(false);
   const [noTelp, setNoTelp] = useState<string>("");
@@ -105,42 +105,19 @@ export default function LandingNavbar() {
   }
 
   return (
-    <div style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }} className="w-full bg-white">
+    <div style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }} className="relative z-40 w-full bg-white">
       <nav className="w-full flex items-center gap-4 px-6 py-4 flex-wrap">
         {/* LOGO */}
         <div className="flex items-center shrink-0">
-            <img
-                src="/image/logo cuantix.png"
-                alt="Cuantix"
-                className="h-18 w-auto shrink-0 object-contain"
-            />
-            </div>
+          <img
+            src="/image/logo-cuantix.png"
+            alt="Cuantix"
+            className="h-18 w-auto shrink-0 object-contain"
+          />
+        </div>
 
         {/* SEARCH */}
-        <div className="flex-1 min-w-[200px]">
-          <div
-            className="flex items-center gap-2 rounded-[12px] px-5 py-2.5"
-            style={{
-                border: "2px solid transparent",
-                background: `linear-gradient(white, white) padding-box, ${SEARCH_BORDER_GRADIENT} border-box`,
-            }}
-            >
-            <input
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setSearchQuery(e.target.value)
-                }
-                placeholder="Cari Konser"
-                className="flex-1 outline-none bg-transparent text-sm"
-                style={{ color: "#6D28D9" }}
-            />
-
-            <Search
-                className="w-5 h-5 shrink-0"
-                style={{ color: "#7C3AED" }}
-            />
-            </div>
-        </div>
+        <SearchBar />
 
         {/* PEMBELIAN */}
         <div className="relative shrink-0" ref={pembelianRef}>
@@ -177,7 +154,7 @@ export default function LandingNavbar() {
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
                 aria-label="Tutup"
               >
-                <X className="w-4 h-4" />
+                <GradientIcon type="close" size={16} color="#9CA3AF" />
               </button>
               <h3 className="font-bold text-center text-gray-900 mb-2">Cek Pembelian Tiket</h3>
               <p className="text-xs text-center text-gray-600 mb-5 leading-relaxed">
@@ -237,12 +214,7 @@ export default function LandingNavbar() {
               backgroundClip: "padding-box, border-box",
             }}
           >
-            <MapPin
-              className="w-4 h-4"
-              style={{ color: "#E91E8C" }}
-              fill="#E91E8C"
-            />
-
+            <GradientIcon type="mapPin" size={16} />
             {selectedLokasi}
           </button>
 
@@ -256,7 +228,7 @@ export default function LandingNavbar() {
                   placeholder="Cari Nama Kota"
                   className="flex-1 outline-none bg-transparent text-sm text-[#6D28D9]"
                 />
-                <Search className="w-4 h-4 shrink-0" style={{ color: "#7C3AED" }} />
+                <GradientIcon type="search" size={16} />
               </div>
 
               <div className="overflow-y-auto pr-1">
@@ -310,7 +282,7 @@ export default function LandingNavbar() {
             className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-90 transition-opacity"
             style={{ background: AKUN_GRADIENT }}
           >
-            <User className="w-4 h-4" />
+            <GradientIcon type="user" size={16} color="#ffffff" />
             Akun
           </button>
 

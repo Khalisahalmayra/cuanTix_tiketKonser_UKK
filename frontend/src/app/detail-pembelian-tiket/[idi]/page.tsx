@@ -21,7 +21,7 @@ const GRADIENT = "linear-gradient(90deg, #7C3AED 0%, #E91E8C 100%)";
 
 // Dummy data — ganti dengan hasil fetch API berdasarkan ID tiket
 const TICKET_DETAIL = {
-  eventImage: "/image/snada event.png",
+  eventImage: "/image/snada-event.png",
   eventTitle: "Snada Indonesia - 2026",
   venue: "Istora Senayan, Jakarta Pusat",
   eventDateTime: "Sabtu, 10 October 2026 - 22.00 WIB",

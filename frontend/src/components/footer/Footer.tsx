@@ -1,15 +1,6 @@
 import Image from "next/image";
-import { ShieldCheck } from "lucide-react";
 
-import {
-  FaInstagram,
-  FaFacebookF,
-  FaYoutube,
-  FaLinkedinIn,
-  FaTiktok,
-} from "react-icons/fa";
-
-import { FaXTwitter } from "react-icons/fa6";
+import GradientIcon, { type GradientIconType } from "@/components/icon/GradientIcon";
 
 const GRADIENT =
   "linear-gradient(90deg, #7C3AED 0%, #E91E8C 100%)";
@@ -33,31 +24,13 @@ const PAYMENT_METHODS = [
   { name: "Alfamart", image: "/image/payment/alfamart.png" },
 ];
 
-const SOCIALS = [
-  {
-    name: "Instagram",
-    icon: FaInstagram,
-  },
-  {
-    name: "TikTok",
-    icon: FaTiktok,
-  },
-  {
-    name: "X",
-    icon: FaXTwitter,
-  },
-  {
-    name: "Facebook",
-    icon: FaFacebookF,
-  },
-  {
-    name: "YouTube",
-    icon: FaYoutube,
-  },
-  {
-    name: "LinkedIn",
-    icon: FaLinkedinIn,
-  },
+const SOCIALS: { name: string; type: GradientIconType }[] = [
+  { name: "Instagram", type: "instagram" },
+  { name: "TikTok", type: "tiktok" },
+  { name: "X", type: "x" },
+  { name: "Facebook", type: "facebook" },
+  { name: "YouTube", type: "youtube" },
+  { name: "LinkedIn", type: "linkedin" },
 ];
 
 export default function Footer() {
@@ -80,7 +53,7 @@ export default function Footer() {
         {/* ================= BRAND ================= */}
         <div>
           <Image
-            src="/image/logo cuantix.png"
+            src="/image/logo-cuantix.png"
             alt="Cuantix"
             width={155}
             height={50}
@@ -112,28 +85,7 @@ export default function Footer() {
             </h3>
 
             <div className="mt-5 flex justify-center">
-              <ShieldCheck
-                className="h-12 w-12"
-                strokeWidth={1.8}
-                style={{
-                  stroke: "url(#shield-gradient)",
-                }}
-              />
-
-              <svg width="0" height="0">
-                <defs>
-                  <linearGradient
-                    id="shield-gradient"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#7C3AED" />
-                    <stop offset="100%" stopColor="#E91E8C" />
-                  </linearGradient>
-                </defs>
-              </svg>
+              <GradientIcon type="shieldCheck" size={48} />
             </div>
           </div>
 
@@ -215,8 +167,6 @@ export default function Footer() {
 
             <div className="mt-4 flex flex-wrap gap-3">
               {SOCIALS.map((social) => {
-                const Icon = social.icon;
-
                 return (
                   <a
                     key={social.name}
@@ -232,12 +182,7 @@ export default function Footer() {
                       backgroundClip: "padding-box, border-box",
                     }}
                   >
-                    <Icon
-                      className="h-6 w-6"
-                      style={{
-                        color: "#A21CAF",
-                      }}
-                    />
+                    <GradientIcon type={social.type} size={24} />
                   </a>
                 );
               })}
