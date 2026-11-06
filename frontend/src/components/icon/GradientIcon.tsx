@@ -38,7 +38,16 @@ export type GradientIconType =
   | "navigation"
   | "mapPinned"
   | "chevronDown"
-  | "arrowLeft";
+  | "arrowLeft"
+  | "clock"
+  | "landmark"
+  | "creditCard"
+  | "qrCode"
+  | "copy"
+  | "info"
+  | "checkCircle"
+  | "download"
+  | "send";
 
 type GradientIconProps = {
   type: GradientIconType;
@@ -71,6 +80,97 @@ export default function GradientIcon({
               {...common}
             />
             <path d="M19 9C20.5 9.5 21 10.5 21 12S20.5 14.5 19 15" {...common} />
+          </>
+        );
+
+        case "checkCircle":
+        return (
+          <>
+            <circle cx="12" cy="12" r="10" {...common} />
+            <path d="m9 12 2 2 4-4" {...common} />
+          </>
+        );
+ 
+      case "download":
+        return (
+          <>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" {...common} />
+            <path d="m7 10 5 5 5-5" {...common} />
+            <path d="M12 15V3" {...common} />
+          </>
+        );
+ 
+      case "send":
+        return (
+          <>
+            <path
+              d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+              {...common}
+            />
+            <path d="m21.854 2.147-10.94 10.939" {...common} />
+          </>
+        );
+
+      case "clock":
+        return (
+          <>
+            <circle cx="12" cy="12" r="10" {...common} />
+            <path d="M12 6v6l4 2" {...common} />
+          </>
+        );
+
+        case "landmark":
+        return (
+          <>
+            <path d="M3 22h18" {...common} />
+            <path d="M6 18v-7" {...common} />
+            <path d="M10 18v-7" {...common} />
+            <path d="M14 18v-7" {...common} />
+            <path d="M18 18v-7" {...common} />
+            <path d="M12 2 20 7H4Z" {...common} />
+          </>
+        );
+ 
+      case "creditCard":
+        return (
+          <>
+            <rect x="2" y="5" width="20" height="14" rx="2" {...common} />
+            <path d="M2 10h20" {...common} />
+          </>
+        );
+ 
+      case "qrCode":
+        return (
+          <>
+            <rect x="3" y="3" width="5" height="5" rx="1" {...common} />
+            <rect x="16" y="3" width="5" height="5" rx="1" {...common} />
+            <rect x="3" y="16" width="5" height="5" rx="1" {...common} />
+            <path d="M21 16h-3a2 2 0 0 0-2 2v3" {...common} />
+            <path d="M21 21v.01" {...common} />
+            <path d="M12 7v3a2 2 0 0 1-2 2H7" {...common} />
+            <path d="M3 12h.01" {...common} />
+            <path d="M12 3h.01" {...common} />
+            <path d="M12 16v.01" {...common} />
+            <path d="M16 12h1" {...common} />
+            <path d="M21 12v.01" {...common} />
+            <path d="M12 21v-1" {...common} />
+          </>
+        );
+ 
+      case "copy":
+        return (
+          <>
+            <rect x="8" y="8" width="14" height="14" rx="2" ry="2" {...common} />
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" {...common} />
+          </>
+        );
+ 
+      case "info":
+        return (
+          <>
+            <circle cx="12" cy="12" r="10" {...common} />
+            <path d="M12 16v-4" {...common} />
+            <path d="M12 8h.01" {...common} />
           </>
         );
 

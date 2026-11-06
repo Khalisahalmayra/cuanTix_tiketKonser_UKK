@@ -44,7 +44,7 @@ type UserInfo = {
 // Route tujuan (sesuaikan dengan struktur folder app/ kamu)
 const ROUTES = {
   buatEvent: "/buat-event",
-  profil: "/akun/profil",
+  profil: "/akun/profile",
   riwayatTransaksi: "/akun/riwayat-transaksi",
   metodePembayaran: "/akun/metode-pembayaran",
   pesananKamu: "/akun/pesanan",
