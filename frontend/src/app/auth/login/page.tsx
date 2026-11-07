@@ -44,7 +44,7 @@ export default function LoginPage() {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
     };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -55,11 +55,26 @@ export default function LoginPage() {
 
     try {
       setIsSubmitting(true);
-      // TODO: hook up to your auth/login endpoint
-      // await fetch("/api/auth/login", { method: "POST", body: JSON.stringify(form) });
-      console.log("Logging in:", form);
+
+      const res = await fetch("http://localhost:4000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Email atau password salah.");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      window.location.href = "/home";
     } catch {
-      setError("Email atau password salah.");
+      setError("Tidak bisa terhubung ke server.");
     } finally {
       setIsSubmitting(false);
     }

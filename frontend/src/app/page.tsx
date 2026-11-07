@@ -8,7 +8,9 @@ import Footer from "@/components/footer/Footer";
 
 import HeroBanner from "@/components/banner/HeroBanner";
 import CategoryList from "@/components/category/CategoryList";
-import EventCard, { DUMMY_EVENTS } from "@/components/cards/EventCard";
+import EventCard from "@/components/cards/EventCard";
+
+import { EVENTS } from "@/data/events";
 
 import UpcomingEventCard, {
   UPCOMING_EVENTS,
@@ -25,6 +27,11 @@ const PROMO_BANNERS = [
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState("Semua");
+
+  const konserTerbaru = [...EVENTS]
+  .filter((e) => activeCategory === "Semua" || e.category === activeCategory)
+  .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+  .slice(0, 8);
 
   const handleRemind = (eventTitle: string) => {
     alert(`Pengingat untuk "${eventTitle}" dipilih.`);
@@ -95,9 +102,9 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {DUMMY_EVENTS.map((event, index) => (
-              <EventCard key={`${event.title}-${index}`} event={event} />
-            ))}
+          {konserTerbaru.map((event) => (
+          <EventCard key={event.id} event={event} />
+        ))}
           </div>
         </section>
 

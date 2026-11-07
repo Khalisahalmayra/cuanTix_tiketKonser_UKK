@@ -1,50 +1,6 @@
-
 import Image from "next/image";
 import Link from "next/link";
-
-export type Event = {
-  image: string;
-  location: string;
-  title: string;
-  organizer: string;
-  price: string;
-  tickets: string;
-};
-
-export const DUMMY_EVENTS: Event[] = [
-  {
-    image: "/image/snada-event.png",
-    location: "Jakarta",
-    title: "Senada Indonesia - 2026",
-    organizer: "Sucor Sekuritas & OPPAL",
-    price: "Rp 75.000 - 1.500.000",
-    tickets: "301 Tiket Tersedia",
-  },
-  {
-    image: "/image/snada-event.png",
-    location: "Jakarta",
-    title: "Senada Indonesia - 2026",
-    organizer: "Sucor Sekuritas & OPPAL",
-    price: "Rp 75.000 - 1.500.000",
-    tickets: "301 Tiket Tersedia",
-  },
-  {
-    image: "/image/snada-event.png",
-    location: "Jakarta",
-    title: "Senada Indonesia - 2026",
-    organizer: "Sucor Sekuritas & OPPAL",
-    price: "Rp 75.000 - 1.500.000",
-    tickets: "301 Tiket Tersedia",
-  },
-  {
-    image: "/image/snada-event.png",
-    location: "Jakarta",
-    title: "Senada Indonesia - 2026",
-    organizer: "Sucor Sekuritas & OPPAL",
-    price: "Rp 75.000 - 1.500.000",
-    tickets: "301 Tiket Tersedia",
-  },
-];
+import type { Event } from "@/data/events";
 
 type EventCardProps = {
   event: Event;

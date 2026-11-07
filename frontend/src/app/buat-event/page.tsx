@@ -197,8 +197,8 @@ export default function BuatEventPage() {
               <textarea
                 value={pesan}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPesan(e.target.value)}
-                placeholder="Ketik Pesan Subjict Anda . . ."
-                required
+                placeholder="Ketik Pesan Subject Anda . . ."
+                required 
                 rows={7}
                 className={`${fieldClass} min-h-[198px] resize-y py-5 placeholder:text-[#8A2A9C]`}
                 style={{ borderColor: PURPLE, color: "#5B1AA8" }}
