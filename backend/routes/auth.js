@@ -19,7 +19,6 @@ router.post("/register", async (req, res) => {
 
   const cleanEmail = email.trim().toLowerCase();
 
-  // Cek email sudah dipakai atau belum
   const { data: existing } = await supabase
     .from("users")
     .select("id")
