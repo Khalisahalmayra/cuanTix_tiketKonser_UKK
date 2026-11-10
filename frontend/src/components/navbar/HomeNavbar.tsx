@@ -115,12 +115,22 @@ export default function HomeNavbar() {
   const akunRef = useRef<HTMLDivElement>(null);
   useOutsideClose(akunRef, () => setAkunOpen(false));
 
-  // TODO: ganti dengan data user asli dari session/auth
-  const [user] = useState<UserInfo>({
-    nama: "Iput Cantik",
+  const [user, setUser] = useState<UserInfo>({
+    nama: "",
     tipe: "Personal",
-    foto: "/image/avatar.png",
   });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        const data = JSON.parse(raw);
+        setUser((prev) => ({ ...prev, nama: data.name || "Pengguna" }));
+      }
+    } catch {
+      // abaikan kalau data rusak
+    }
+  }, []);
 
   const filteredKota: string[] = KOTA_LIST.filter((k) =>
     k.toLowerCase().includes(lokasiQuery.toLowerCase())
@@ -134,7 +144,8 @@ export default function HomeNavbar() {
 
   function handleLogout(): void {
     setAkunOpen(false);
-    // TODO: panggil logout (signOut / hapus token), lalu arahkan ke beranda
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     router.push("/");
   }
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 import NavbarHome from "@/components/navbar/HomeNavbar";
+import AuthGuard from "@/components/auth/AuthGuard";
 import HeroBanner from "@/components/banner/HeroBanner";
 import CategoryList from "@/components/category/CategoryList";
 import EventCard from "@/components/cards/EventCard";
@@ -37,6 +38,7 @@ export default function HomePage() {
   };
 
   return (
+        <AuthGuard>
     <main className="min-h-screen bg-white">
       <NavbarHome />
 
@@ -176,5 +178,6 @@ export default function HomePage() {
         </div>
       </section>
     </main>
+    </AuthGuard>
   );
 }
