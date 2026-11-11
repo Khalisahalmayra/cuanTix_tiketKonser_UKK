@@ -72,7 +72,7 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      window.location.href = "/home";
+      window.location.href = data.user.role === "admin" ? "/admin" : "/home";
     } catch {
       setError("Tidak bisa terhubung ke server.");
     } finally {

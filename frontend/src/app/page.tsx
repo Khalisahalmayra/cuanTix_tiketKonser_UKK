@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import GradientIcon from "@/components/icon/GradientIcon";
 import LandingNavbar from "@/components/navbar/LandingNavbar";
@@ -10,7 +10,7 @@ import HeroBanner from "@/components/banner/HeroBanner";
 import CategoryList from "@/components/category/CategoryList";
 import EventCard from "@/components/cards/EventCard";
 
-import { EVENTS } from "@/data/events";
+import { fetchEvents, type Event } from "@/data/events";
 
 import UpcomingEventCard, {
   UPCOMING_EVENTS,
@@ -27,11 +27,21 @@ const PROMO_BANNERS = [
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState("Semua");
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const konserTerbaru = [...EVENTS]
-  .filter((e) => activeCategory === "Semua" || e.category === activeCategory)
-  .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
-  .slice(0, 8);
+  useEffect(() => {
+    fetchEvents()
+      .then(setEvents)
+      .catch(() => setError("Gagal memuat event."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const konserTerbaru = [...events]
+    .filter((e) => activeCategory === "Semua" || e.category === activeCategory)
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+    .slice(0, 8);
 
   const handleRemind = (eventTitle: string) => {
     alert(`Pengingat untuk "${eventTitle}" dipilih.`);
@@ -53,32 +63,31 @@ export default function Home() {
         />
 
         {/* PROMO BANNER */}
-      <section className="w-full px-5 pt-8 sm:px-8 lg:px-16">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {PROMO_BANNERS.map((banner) => (
-            <div
-              key={banner.src}
-              className="overflow-hidden rounded-2xl shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-md"
-            >
-              <Image
-                src={banner.src}
-                alt={banner.alt}
-                width={0}
-                height={0}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="h-auto w-full"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+        <section className="w-full px-5 pt-8 sm:px-8 lg:px-16">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {PROMO_BANNERS.map((banner) => (
+              <div
+                key={banner.src}
+                className="overflow-hidden rounded-2xl shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-md"
+              >
+                <Image
+                  src={banner.src}
+                  alt={banner.alt}
+                  width={0}
+                  height={0}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="h-auto w-full"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* EVENT KONSER TERBARU */}
         <section className="w-full px-5 pb-16 pt-8 sm:px-8 lg:px-16">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <GradientIcon type="megaphone" size={32} />
-
               <h2 className="flex items-center gap-2 text-lg font-extrabold text-gray-900 sm:text-xl">
                 Event Konser Terbaru
               </h2>
@@ -89,10 +98,7 @@ export default function Home() {
               className="shrink-0 rounded-[10px] px-5 py-2 text-xs font-semibold text-gray-900 transition-all duration-200 hover:bg-[#F3EBFF]"
               style={{
                 border: "1.5px solid transparent",
-                backgroundImage: `
-                  linear-gradient(white, white),
-                  ${SEARCH_BORDER_GRADIENT}
-                `,
+                backgroundImage: `linear-gradient(white, white), ${SEARCH_BORDER_GRADIENT}`,
                 backgroundOrigin: "border-box",
                 backgroundClip: "padding-box, border-box",
               }}
@@ -101,11 +107,21 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {konserTerbaru.map((event) => (
-          <EventCard key={event.id} event={event} />
-        ))}
-          </div>
+          {loading ? (
+            <p className="text-sm text-gray-500">Memuat event...</p>
+          ) : error ? (
+            <p className="text-sm text-red-500">{error}</p>
+          ) : konserTerbaru.length === 0 ? (
+            <p className="text-sm text-gray-500">
+              Belum ada event untuk kategori ini.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {konserTerbaru.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* AKAN SEGERA DATANG */}
@@ -113,7 +129,6 @@ export default function Home() {
           <div className="mb-5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <GradientIcon type="megaphone" size={32} />
-
               <h2 className="flex items-center gap-2 text-lg font-extrabold text-gray-900 sm:text-xl">
                 Akan Segera Datang
               </h2>
@@ -124,10 +139,7 @@ export default function Home() {
               className="shrink-0 rounded-[10px] px-5 py-2 text-xs font-semibold text-gray-900 transition-all duration-200 hover:bg-[#F3EBFF]"
               style={{
                 border: "1.5px solid transparent",
-                backgroundImage: `
-                  linear-gradient(white, white),
-                  ${SEARCH_BORDER_GRADIENT}
-                `,
+                backgroundImage: `linear-gradient(white, white), ${SEARCH_BORDER_GRADIENT}`,
                 backgroundOrigin: "border-box",
                 backgroundClip: "padding-box, border-box",
               }}
