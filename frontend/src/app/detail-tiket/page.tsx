@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import HomeNavbar from "@/components/navbar/HomeNavbar";
 import GradientIcon from "@/components/icon/GradientIcon";
 import EventBanner from "@/components/banner/EventBanner";
+import WishlistButton from "@/components/wishlist/WishlistButton";
+import EventDescription from "@/components/event-detail/EventDescription";
 
 const poster = "/image/snada-event.png";
 const denah = "/image/denah-snada.png";
@@ -27,6 +29,33 @@ const tickets = [
 
 const formatPrice = (price: number) =>
   "Rp" + price.toLocaleString("id-ID");
+
+// TODO: ganti dengan deskripsi resmi dari penyelenggara / data dari API
+const eventInfo = {
+  description: [
+    "Snada Indonesia 2026 adalah konser musik pop yang dipersembahkan oleh Sucor Sekuritas bersama OPPAL. Acara digelar di Istora Senayan, Jakarta Pusat, pada Sabtu, 10 Oktober 2026 pukul 22.00 WIB.",
+  ],
+  lineup: [
+    "Fresly Nikijuluw",
+    "Jacson Zeran",
+    "Moluccan Soul",
+    "Toton Caribo",
+    "Andmesh",
+    "Anggun",
+    "Virzha",
+  ],
+  credits: [
+    { label: "Musical Collaboration", value: "Rumah Orkestra Jogja" },
+    { label: "Dance Performance", value: "#TeamBoro" },
+  ],
+};
+
+const tabs = [
+  { id: "kategori", label: "Kategori & Harga" },
+  { id: "deskripsi", label: "Deskripsi" },
+  { id: "syarat", label: "Syarat & Ketentuan" },
+  { id: "lokasi", label: "Lokasi" },
+];
 
 export default function DetailTiketPage() {
   const router = useRouter();
@@ -96,6 +125,12 @@ export default function DetailTiketPage() {
 
         {/* ================= KOLOM KIRI ================= */}
         <div className="min-w-0">
+
+          <EventDescription
+              description={eventInfo.description}
+              lineup={eventInfo.lineup}
+              credits={eventInfo.credits}
+            />
 
           {/* ================= KATEGORI & HARGA ================= */}
           <section
@@ -332,11 +367,14 @@ export default function DetailTiketPage() {
           <div className="overflow-hidden rounded-2xl border-[5px] border-purple-100 bg-white shadow-lg">
 
             {/* POSTER EVENT */}
-            <img
-              src={poster}
-              alt="Snada Indonesia 2026"
-              className="aspect-[1.7/1] w-full object-cover"
-            />
+              <div className="relative">
+                <img
+                  src={poster}
+                  alt="Snada Indonesia 2026"
+                  className="aspect-[1.7/1] w-full object-cover"
+                />
+                <WishlistButton eventId="snada-indonesia-2026" />
+              </div>
 
             {/* HARGA TIKET */}
             <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-5 md:px-8">

@@ -47,19 +47,24 @@ export type GradientIconType =
   | "info"
   | "checkCircle"
   | "download"
-  | "send";
+  | "send"
+  | "bell"
+  | "heart";
 
 type GradientIconProps = {
   type: GradientIconType;
   size?: number;
   /** Isi warna polos (mis. "#ffffff"). Kalau kosong, pakai gradasi ungu → pink. */
   color?: string;
+  /** Isi bentuk ikon (mis. ikon hati yang sedang aktif). */
+  filled?: boolean;
 };
 
 export default function GradientIcon({
   type,
   size = 22,
   color,
+  filled = false,
 }: GradientIconProps) {
   const gradientId = `gradient-${type}`;
   const stroke = color ?? `url(#${gradientId})`;
@@ -80,97 +85,6 @@ export default function GradientIcon({
               {...common}
             />
             <path d="M19 9C20.5 9.5 21 10.5 21 12S20.5 14.5 19 15" {...common} />
-          </>
-        );
-
-        case "checkCircle":
-        return (
-          <>
-            <circle cx="12" cy="12" r="10" {...common} />
-            <path d="m9 12 2 2 4-4" {...common} />
-          </>
-        );
- 
-      case "download":
-        return (
-          <>
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" {...common} />
-            <path d="m7 10 5 5 5-5" {...common} />
-            <path d="M12 15V3" {...common} />
-          </>
-        );
- 
-      case "send":
-        return (
-          <>
-            <path
-              d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
-              {...common}
-            />
-            <path d="m21.854 2.147-10.94 10.939" {...common} />
-          </>
-        );
-
-      case "clock":
-        return (
-          <>
-            <circle cx="12" cy="12" r="10" {...common} />
-            <path d="M12 6v6l4 2" {...common} />
-          </>
-        );
-
-        case "landmark":
-        return (
-          <>
-            <path d="M3 22h18" {...common} />
-            <path d="M6 18v-7" {...common} />
-            <path d="M10 18v-7" {...common} />
-            <path d="M14 18v-7" {...common} />
-            <path d="M18 18v-7" {...common} />
-            <path d="M12 2 20 7H4Z" {...common} />
-          </>
-        );
- 
-      case "creditCard":
-        return (
-          <>
-            <rect x="2" y="5" width="20" height="14" rx="2" {...common} />
-            <path d="M2 10h20" {...common} />
-          </>
-        );
- 
-      case "qrCode":
-        return (
-          <>
-            <rect x="3" y="3" width="5" height="5" rx="1" {...common} />
-            <rect x="16" y="3" width="5" height="5" rx="1" {...common} />
-            <rect x="3" y="16" width="5" height="5" rx="1" {...common} />
-            <path d="M21 16h-3a2 2 0 0 0-2 2v3" {...common} />
-            <path d="M21 21v.01" {...common} />
-            <path d="M12 7v3a2 2 0 0 1-2 2H7" {...common} />
-            <path d="M3 12h.01" {...common} />
-            <path d="M12 3h.01" {...common} />
-            <path d="M12 16v.01" {...common} />
-            <path d="M16 12h1" {...common} />
-            <path d="M21 12v.01" {...common} />
-            <path d="M12 21v-1" {...common} />
-          </>
-        );
- 
-      case "copy":
-        return (
-          <>
-            <rect x="8" y="8" width="14" height="14" rx="2" ry="2" {...common} />
-            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" {...common} />
-          </>
-        );
- 
-      case "info":
-        return (
-          <>
-            <circle cx="12" cy="12" r="10" {...common} />
-            <path d="M12 16v-4" {...common} />
-            <path d="M12 8h.01" {...common} />
           </>
         );
 
@@ -465,6 +379,114 @@ export default function GradientIcon({
           <>
             <path d="m12 19-7-7 7-7" {...common} />
             <path d="M19 12H5" {...common} />
+          </>
+        );
+
+      case "heart":
+        return (
+          <path
+            d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+            {...common}
+            fill={filled ? stroke : "none"}
+          />
+        );
+
+      case "checkCircle":
+        return (
+          <>
+            <circle cx="12" cy="12" r="10" {...common} />
+            <path d="m9 12 2 2 4-4" {...common} />
+          </>
+        );
+
+      case "download":
+        return (
+          <>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" {...common} />
+            <path d="m7 10 5 5 5-5" {...common} />
+            <path d="M12 15V3" {...common} />
+          </>
+        );
+
+      case "send":
+        return (
+          <>
+            <path
+              d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+              {...common}
+            />
+            <path d="m21.854 2.147-10.94 10.939" {...common} />
+          </>
+        );
+
+      case "clock":
+        return (
+          <>
+            <circle cx="12" cy="12" r="10" {...common} />
+            <path d="M12 6v6l4 2" {...common} />
+          </>
+        );
+
+      case "landmark":
+        return (
+          <>
+            <path d="M3 22h18" {...common} />
+            <path d="M6 18v-7" {...common} />
+            <path d="M10 18v-7" {...common} />
+            <path d="M14 18v-7" {...common} />
+            <path d="M18 18v-7" {...common} />
+            <path d="M12 2 20 7H4Z" {...common} />
+          </>
+        );
+
+      case "bell":
+        return (
+          <>
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" {...common} />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" {...common} />
+          </>
+        );
+
+      case "creditCard":
+        return (
+          <>
+            <rect x="2" y="5" width="20" height="14" rx="2" {...common} />
+            <path d="M2 10h20" {...common} />
+          </>
+        );
+
+      case "qrCode":
+        return (
+          <>
+            <rect x="3" y="3" width="5" height="5" rx="1" {...common} />
+            <rect x="16" y="3" width="5" height="5" rx="1" {...common} />
+            <rect x="3" y="16" width="5" height="5" rx="1" {...common} />
+            <path d="M21 16h-3a2 2 0 0 0-2 2v3" {...common} />
+            <path d="M21 21v.01" {...common} />
+            <path d="M12 7v3a2 2 0 0 1-2 2H7" {...common} />
+            <path d="M3 12h.01" {...common} />
+            <path d="M12 3h.01" {...common} />
+            <path d="M12 16v.01" {...common} />
+            <path d="M16 12h1" {...common} />
+            <path d="M21 12v.01" {...common} />
+            <path d="M12 21v-1" {...common} />
+          </>
+        );
+
+      case "copy":
+        return (
+          <>
+            <rect x="8" y="8" width="14" height="14" rx="2" ry="2" {...common} />
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" {...common} />
+          </>
+        );
+
+      case "info":
+        return (
+          <>
+            <circle cx="12" cy="12" r="10" {...common} />
+            <path d="M12 16v-4" {...common} />
+            <path d="M12 8h.01" {...common} />
           </>
         );
 

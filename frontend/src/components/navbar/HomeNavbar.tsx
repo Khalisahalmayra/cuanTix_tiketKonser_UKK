@@ -4,6 +4,9 @@ import React, { useState, useRef, useEffect, RefObject } from "react";
 import { useRouter } from "next/navigation";
 import SearchBar from "@/components/search/SearchBar";
 import GradientIcon from "@/components/icon/GradientIcon";
+import ChatWidget, { OPEN_CHAT_EVENT } from "@/components/chat/ChatWidget";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import LogoutConfirmModal from "@/components/account/LogoutConfirmModal";
 
 const KOTA_LIST: string[] = [
   "Jakarta",
@@ -51,12 +54,45 @@ const ROUTES = {
   ulasanSaya: "/akun/ulasan",
   pengaturanAkun: "/akun/pengaturan",
   pusatBantuan: "/bantuan",
+  caraBeliTiket: "/bantuan/cara-beli-tiket",
+  notifikasi: "/akun/notifikasi",
+  wishlist: "/akun/wishlist",
 } as const;
+
+// Kontak pusat bantuan (ganti dengan kontak asli)
+// Nomor WhatsApp pakai format internasional tanpa "+" dan tanpa "0" di depan
+// (contoh: 0812-3456-7890 -> 6281234567890)
+const CONTACT_WA_NUMBER = "6285220289837";
+const CONTACT_EMAIL = "pumpkindspie@gmail.com";
+
+// Link chat WhatsApp dengan pesan awal yang sudah terisi
+function buildWhatsAppLink(nama: string): string {
+  const text = `Halo Cuantix, saya ${nama}. Saya butuh bantuan terkait pemesanan tiket.`;
+  return `https://wa.me/${CONTACT_WA_NUMBER}?text=${encodeURIComponent(text)}`;
+}
+
+// Link email dengan subjek dan isi awal yang sudah terisi
+function buildEmailLink(nama: string): string {
+  const subject = "Bantuan Cuantix";
+  const body = `Halo tim Cuantix,\n\nNama: ${nama}\nKendala: \n\nTerima kasih.`;
+  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 
 // Gradasi tombol Akun
 const AKUN_GRADIENT = "linear-gradient(180deg,#5B1AA8 0%,#8A2A9C 55%,#E2408A 100%)";
 // Gradasi border (ungu -> pink)
 const SEARCH_BORDER_GRADIENT = "linear-gradient(90deg,#7C3AED 0%,#E91E8C 100%)";
+
+// Style tombol ikon dengan border gradasi (dipakai tombol bantuan)
+function gradientBorderStyle(active: boolean): React.CSSProperties {
+  const fill = active ? "#F3EBFF" : "white";
+  return {
+    border: "2px solid transparent",
+    backgroundImage: `linear-gradient(${fill}, ${fill}), ${SEARCH_BORDER_GRADIENT}`,
+    backgroundOrigin: "border-box",
+    backgroundClip: "padding-box, border-box",
+  };
+}
 
 function groupByLetter(list: string[]): GroupedKota {
   const sorted = [...list].sort((a, b) => a.localeCompare(b));
@@ -85,19 +121,39 @@ function useOutsideClose<T extends HTMLElement>(
 type MenuItemProps = {
   icon: React.ReactNode;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
+  href?: string; // kalau diisi, dibuka sebagai link eksternal di tab baru
   danger?: boolean;
 };
 
-function MenuItem({ icon, label, onClick, danger = false }: MenuItemProps) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left text-[13px] font-semibold hover:bg-[#F3EBFF] transition-colors"
-      style={{ color: danger ? "#E11D2E" : "#3B0F8C" }}
-    >
+function MenuItem({ icon, label, onClick, href, danger = false }: MenuItemProps) {
+  const className =
+    "w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left text-[13px] font-semibold hover:bg-[#F3EBFF] transition-colors";
+  const style = { color: danger ? "#E11D2E" : "#3B0F8C" };
+  const content = (
+    <>
       <span className="w-6 h-6 flex items-center justify-center shrink-0">{icon}</span>
       {label}
+    </>
+  );
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        style={style}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <button onClick={onClick} className={className} style={style}>
+      {content}
     </button>
   );
 }
@@ -115,8 +171,15 @@ export default function HomeNavbar() {
   const akunRef = useRef<HTMLDivElement>(null);
   useOutsideClose(akunRef, () => setAkunOpen(false));
 
+  const [helpOpen, setHelpOpen] = useState<boolean>(false);
+  const helpRef = useRef<HTMLDivElement>(null);
+  useOutsideClose(helpRef, () => setHelpOpen(false));
+
+  const [logoutOpen, setLogoutOpen] = useState<boolean>(false);
+
+  // TODO: ganti dengan data user asli dari session/auth
   const [user, setUser] = useState<UserInfo>({
-    nama: "",
+    nama: "Iput Cantik",
     tipe: "Personal",
   });
 
@@ -137,16 +200,35 @@ export default function HomeNavbar() {
   );
   const groupedKota: GroupedKota = groupByLetter(filteredKota);
 
-  function goTo(path: string): void {
+  // Menutup dropdown milik navbar ini.
+  // (Dropdown notifikasi dikelola sendiri oleh <NotificationBell />)
+  function closeAll(): void {
+    setLokasiOpen(false);
     setAkunOpen(false);
+    setHelpOpen(false);
+  }
+
+  function goTo(path: string): void {
+    closeAll();
     router.push(path);
   }
 
+  // Klik "Keluar" -> tampilkan dialog konfirmasi dulu
   function handleLogout(): void {
-    setAkunOpen(false);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    closeAll();
+    setLogoutOpen(true);
+  }
+
+  // Dipanggil setelah user menekan "Ya, Keluar" di dialog konfirmasi
+  function confirmLogout(): void {
+    setLogoutOpen(false);
+    // TODO: panggil logout (signOut / hapus token), lalu arahkan ke beranda
     router.push("/");
+  }
+
+  function openWebsiteChat(): void {
+    closeAll();
+    window.dispatchEvent(new Event(OPEN_CHAT_EVENT));
   }
 
   return (
@@ -178,8 +260,9 @@ export default function HomeNavbar() {
         <div className="relative shrink-0" ref={lokasiRef}>
           <button
             onClick={() => {
-              setLokasiOpen((v) => !v);
-              setAkunOpen(false);
+              const next = !lokasiOpen;
+              closeAll();
+              setLokasiOpen(next);
             }}
             className={`group relative flex items-center gap-2 font-semibold text-sm px-4 py-2.5 rounded-[12px] transition-all duration-200 ${
               lokasiOpen ? "bg-[#F3EBFF]" : "bg-white hover:bg-[#F3EBFF]"
@@ -255,12 +338,92 @@ export default function HomeNavbar() {
           )}
         </div>
 
+        {/* NOTIFIKASI (dropdown, badge, dan daftar dikelola oleh NotificationBell) */}
+        <NotificationBell allHref={ROUTES.notifikasi} />
+
+        {/* PUSAT BANTUAN */}
+        <div className="relative shrink-0" ref={helpRef}>
+          <button
+            onClick={() => {
+              const next = !helpOpen;
+              closeAll();
+              setHelpOpen(next);
+            }}
+            aria-label="Pusat Bantuan"
+            aria-haspopup="menu"
+            aria-expanded={helpOpen}
+            className="flex h-[44px] w-[44px] items-center justify-center rounded-[12px] transition-all duration-200 hover:bg-[#F3EBFF]"
+            style={gradientBorderStyle(helpOpen)}
+          >
+            <GradientIcon type="help" size={20} />
+          </button>
+
+          {helpOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 mt-3 w-[300px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl z-50 overflow-hidden"
+            >
+              <div className="px-4 pt-4 pb-2">
+                <h4 className="text-[15px] font-bold text-gray-900">Pusat Bantuan</h4>
+                <p className="mt-1 text-xs text-gray-500">
+                  Ada kendala? Kami siap membantu kamu.
+                </p>
+              </div>
+
+              <div className="px-4 pb-2">
+                <MenuItem
+                  icon={<GradientIcon type="help" size={20} />}
+                  label="Pertanyaan Umum (FAQ)"
+                  onClick={() => goTo(ROUTES.pusatBantuan)}
+                />
+                <MenuItem
+                  icon={<GradientIcon type="ticket" size={20} />}
+                  label="Cara Membeli Tiket"
+                  onClick={() => goTo(ROUTES.caraBeliTiket)}
+                />
+              </div>
+
+              <div className="border-t border-gray-200 px-4 pt-3 pb-2">
+                <h5 className="mb-1 text-xs font-bold uppercase tracking-wide text-gray-500">
+                  Hubungi Kami
+                </h5>
+                <MenuItem
+                  icon={<GradientIcon type="messageSquare" size={20} />}
+                  label="Chat di Website"
+                  onClick={openWebsiteChat}
+                />
+                <MenuItem
+                  icon={<GradientIcon type="whatsapp" size={20} />}
+                  label="Chat via WhatsApp"
+                  href={buildWhatsAppLink(user.nama)}
+                />
+                <MenuItem
+                  icon={<GradientIcon type="mail" size={20} />}
+                  label="Kirim Email"
+                  href={buildEmailLink(user.nama)}
+                />
+              </div>
+
+              <div className="border-t border-gray-200 px-4 py-3 text-center">
+                <button
+                  onClick={() => goTo(ROUTES.pusatBantuan)}
+                  className="text-[13px] font-semibold transition-opacity hover:opacity-80"
+                  style={{ color: "#E91E8C" }}
+                >
+                  Buka Pusat Bantuan
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* AKUN */}
         <div className="relative shrink-0" ref={akunRef}>
           <button
             onClick={() => {
-              setAkunOpen((v) => !v);
-              setLokasiOpen(false);
+              const next = !akunOpen;
+              closeAll();
+              setAkunOpen(next);
             }}
             aria-haspopup="menu"
             aria-expanded={akunOpen}
@@ -329,6 +492,11 @@ export default function HomeNavbar() {
                   label="Ulasan Saya"
                   onClick={() => goTo(ROUTES.ulasanSaya)}
                 />
+                <MenuItem
+                  icon={<GradientIcon type="heart" size={20} />}
+                  label="Wishlist"
+                  onClick={() => goTo(ROUTES.wishlist)}
+                />
               </div>
 
               {/* Pusat Bantuan */}
@@ -359,6 +527,16 @@ export default function HomeNavbar() {
           )}
         </div>
       </nav>
+
+      {/* KONFIRMASI KELUAR */}
+      <LogoutConfirmModal
+        open={logoutOpen}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={confirmLogout}
+      />
+
+      {/* CHAT WEBSITE (tombol mengambang di pojok kanan bawah) */}
+      <ChatWidget />
     </div>
   );
 }

@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import GradientIcon, { type GradientIconType } from "@/components/icon/GradientIcon";
+import LogoutConfirmModal from "@/components/account/LogoutConfirmModal";
 
 export type AccountUser = {
   nama: string;
@@ -14,6 +16,7 @@ export const ACCOUNT_ROUTES = {
   riwayatTransaksi: "/akun/riwayat-transaksi",
   metodePembayaran: "/akun/metode-pembayaran",
   pesananKamu: "/akun/pesanan",
+  wishlist: "/akun/wishlist",
   ulasanSaya: "/akun/ulasan",
   pengaturanAkun: "/akun/pengaturan",
   pusatBantuan: "/bantuan",
@@ -31,6 +34,7 @@ const ACTIVITY_MENU: MenuEntry[] = [
   { key: "riwayatTransaksi", label: "Riwayat Transaksi", icon: "trending" },
   { key: "metodePembayaran", label: "Metode Pembayaran", icon: "wallet" },
   { key: "pesananKamu", label: "Pesanan Kamu", icon: "fileText" },
+  { key: "wishlist", label: "Wishlist", icon: "heart" },
   { key: "ulasanSaya", label: "Ulasan Saya", icon: "messageSquare" },
 ];
 
@@ -47,8 +51,11 @@ type AccountSidebarProps = {
 
 export default function AccountSidebar({ user, active }: AccountSidebarProps) {
   const router = useRouter();
+  const [logoutOpen, setLogoutOpen] = useState<boolean>(false);
 
-  function handleLogout(): void {
+  // Dipanggil setelah user menekan "Ya, Keluar" di dialog konfirmasi
+  function confirmLogout(): void {
+    setLogoutOpen(false);
     // TODO: panggil logout (signOut / hapus token), lalu arahkan ke beranda
     router.push("/");
   }
@@ -122,7 +129,7 @@ export default function AccountSidebar({ user, active }: AccountSidebarProps) {
       <div className="mt-5 border-t border-gray-300 pt-4">
         <button
           type="button"
-          onClick={handleLogout}
+          onClick={() => setLogoutOpen(true)}
           className="flex w-full items-center gap-3 rounded-[6px] px-3 py-2 text-left text-[12px] font-semibold transition-colors hover:bg-[#FFE9EC]"
           style={{ color: "#E11D2E" }}
         >
@@ -130,6 +137,13 @@ export default function AccountSidebar({ user, active }: AccountSidebarProps) {
           Keluar
         </button>
       </div>
+
+      {/* KONFIRMASI KELUAR */}
+      <LogoutConfirmModal
+        open={logoutOpen}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={confirmLogout}
+      />
     </aside>
   );
 }
