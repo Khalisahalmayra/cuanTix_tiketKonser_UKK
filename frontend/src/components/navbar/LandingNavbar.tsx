@@ -2,9 +2,9 @@
 
 import React, { useState, useRef, useEffect, RefObject } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import SearchBar from "@/components/search/SearchBar";
-
-import GradientIcon from "@/components/icon/GradientIcon";
+import { ChevronDown, MapPin, Receipt, User, X } from "lucide-react";
 
 const KOTA_LIST: string[] = [
   "Jakarta",
@@ -35,11 +35,6 @@ const KOTA_LIST: string[] = [
 
 type GroupedKota = Record<string, string[]>;
 
-// Gradasi yang sama dipakai di tombol Akun & border search bar biar konsisten
-const AKUN_GRADIENT = "linear-gradient(90deg,#E91E8C 0%,#4C1D95 100%)";
-// Gradasi khusus border (ungu -> pink)
-const SEARCH_BORDER_GRADIENT = "linear-gradient(90deg,#7C3AED 0%,#E91E8C 100%)";
-
 function groupByLetter(list: string[]): GroupedKota {
   const sorted = [...list].sort((a, b) => a.localeCompare(b));
   const groups: GroupedKota = {};
@@ -67,6 +62,15 @@ function useOutsideClose<T extends HTMLElement>(
 export default function LandingNavbar() {
   const router = useRouter();
 
+  const [scrolled, setScrolled] = useState<boolean>(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const [pembelianOpen, setPembelianOpen] = useState<boolean>(false);
   const [noTelp, setNoTelp] = useState<string>("");
   const [namaLengkap, setNamaLengkap] = useState<string>("");
@@ -90,7 +94,6 @@ export default function LandingNavbar() {
 
   function handleLihatPembelian(): void {
     if (!noTelp.trim() || !namaLengkap.trim()) return;
-    // Arahkan ke halaman detail pembelian / panggil API cek pembelian
     router.push(
       `/pembelian/cek?noTelp=${encodeURIComponent(
         noTelp
@@ -105,207 +108,298 @@ export default function LandingNavbar() {
   }
 
   return (
-    <div style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }} className="relative z-40 w-full bg-white">
-      <nav className="w-full flex items-center gap-4 px-6 py-4 flex-wrap">
-        {/* LOGO */}
-        <div className="flex items-center shrink-0">
-          <img
-            src="/image/logo-cuantix.png"
-            alt="Cuantix"
-            className="h-18 w-auto shrink-0 object-contain"
-          />
+    <header
+    className={`sticky top-0 z-40 w-full border-b backdrop-blur-md transition-all duration-300 ${
+      scrolled
+        ? "border-gray-200 bg-white/80 shadow-md"
+        : "border-gray-100 bg-white/95 shadow-none"
+    }`}
+  >
+           <div
+        className={`mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-5 transition-all duration-300 sm:px-8 md:px-10 lg:gap-8 lg:px-14 xl:px-16 ${
+          scrolled ? "h-[64px] md:h-[68px]" : "h-[82px] md:h-[88px]"
+        }`}
+      >
+        {/* LOGO (Prominent, natural ratio, plenty of breathing room) */}
+        
+{/* LOGO CUANTIX */}
+<div
+  onClick={() => router.push("/")}
+  role="button"
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      router.push("/");
+    }
+  }}
+  className="flex shrink-0 cursor-pointer items-center pr-2 transition-transform duration-200 hover:scale-[1.03]"
+>
+  <Image
+    src="/image/logo-cuantix.png"
+    alt="Cuantix - Platform Tiket Konser"
+    width={190}
+    height={60}
+    priority
+    sizes="190px"
+    className={`w-auto object-contain object-left transition-all duration-300 ${
+      scrolled ? "h-11 md:h-12" : "h-12 md:h-14"
+    }`}
+  />
+</div>
+
+
+        {/* SEARCH BAR (Center area, controlled max-width, balanced) */}
+        <div className="hidden sm:block flex-1 max-w-[360px] md:max-w-[420px] lg:max-w-[460px] mx-auto">
+          <SearchBar />
         </div>
 
-        {/* SEARCH */}
-        <SearchBar />
+        {/* RIGHT NAVIGATION ACTIONS */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* TOMBOL PEMBELIAN */}
+          <div className="relative" ref={pembelianRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setPembelianOpen((v) => !v);
+                setLokasiOpen(false);
+                setAkunOpen(false);
+              }}
+              className={`flex h-[44px] items-center gap-2 rounded-full px-4 text-xs sm:text-sm font-semibold transition-all duration-200 border cursor-pointer ${
+                pembelianOpen
+                  ? "border-[#7C3AED] bg-[#FAF5FF] text-[#7C3AED] shadow-2xs"
+                  : "border-gray-200/90 bg-white text-gray-700 hover:border-purple-300 hover:bg-[#FAF8FE] hover:text-[#7C3AED]"
+              }`}
+            >
+              <Receipt className="h-4 w-4 text-[#7C3AED]" />
+              <span className="hidden md:inline">Pembelian</span>
+            </button>
 
-        {/* PEMBELIAN */}
-        <div className="relative shrink-0" ref={pembelianRef}>
-          <button
-            onClick={() => {
-              setPembelianOpen((v) => !v);
-              setLokasiOpen(false);
-              setAkunOpen(false);
-            }}
-            className={`group relative font-semibold text-sm px-4 py-2.5 rounded-[12px] transition-all duration-200 ${
-              pembelianOpen ? "bg-[#F3EBFF]" : "bg-white hover:bg-[#F3EBFF]"
-            }`}
-            style={{
-              color: "#E91E8C",
-              border: "2px solid transparent",
-              backgroundImage: `
-                linear-gradient(
-                  ${pembelianOpen ? "#F3EBFF" : "white"},
-                  ${pembelianOpen ? "#F3EBFF" : "white"}
-                ),
-                ${SEARCH_BORDER_GRADIENT}
-              `,
-              backgroundOrigin: "border-box",
-              backgroundClip: "padding-box, border-box",
-            }}
-          >
-            Pembelian
-          </button>
+            {pembelianOpen && (
+              <div className="absolute right-0 mt-2.5 w-80 rounded-2xl border border-gray-100 bg-white p-5 shadow-2xl z-50">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-3">
+                  <h3 className="text-sm font-bold text-gray-900">
+                    Cek Pembelian Tiket
+                  </h3>
+                  <button
+                    onClick={() => setPembelianOpen(false)}
+                    className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
+                    aria-label="Tutup"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
 
-          {pembelianOpen && (
-            <div className="absolute right-0 mt-3 w-80 bg-[#EDEDED] rounded-2xl shadow-2xl p-6 z-50">
-              <button
-                onClick={() => setPembelianOpen(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-                aria-label="Tutup"
-              >
-                <GradientIcon type="close" size={16} color="#9CA3AF" />
-              </button>
-              <h3 className="font-bold text-center text-gray-900 mb-2">Cek Pembelian Tiket</h3>
-              <p className="text-xs text-center text-gray-600 mb-5 leading-relaxed">
-                Silakan masukkan No. Telp dan nama lengkap yang digunakan saat
-                pembelian untuk melihat detail tiket Anda.
-              </p>
+                <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                  Masukkan No. Telp dan Nama Lengkap yang digunakan saat
+                  pembelian untuk melihat detail tiket.
+                </p>
 
-              <label className="block text-sm font-bold text-gray-900 mb-1">No Telp</label>
-              <input
-                value={noTelp}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNoTelp(e.target.value)}
-                placeholder="No. Telp sesuai pada saat pemesanan tiket"
-                className="w-full rounded-lg px-3 py-2.5 text-xs mb-4 outline-none border border-transparent focus:border-[#7C3AED] bg-white"
-              />
-
-              <label className="block text-sm font-bold text-gray-900 mb-1">Nama Lengkap</label>
-              <input
-                value={namaLengkap}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNamaLengkap(e.target.value)}
-                placeholder="Nama lengkap sesuai pada saat pemesanan tiket"
-                className="w-full rounded-lg px-3 py-2.5 text-xs mb-5 outline-none border border-transparent focus:border-[#7C3AED] bg-white"
-              />
-
-              <button
-                onClick={handleLihatPembelian}
-                className="w-full rounded-full py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-90 transition-opacity"
-                style={{ background: "linear-gradient(90deg,#E91E8C 0%,#6D28D9 100%)" }}
-              >
-                Lihat Pembelian
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* LOKASI */}
-        <div className="relative shrink-0" ref={lokasiRef}>
-          <button
-            onClick={() => {
-              setLokasiOpen((v) => !v);
-              setPembelianOpen(false);
-              setAkunOpen(false);
-            }}
-            className={`group relative flex items-center gap-2 font-semibold text-sm px-4 py-2.5 rounded-[12px] transition-all duration-200 ${
-              lokasiOpen ? "bg-[#F3EBFF]" : "bg-white hover:bg-[#F3EBFF]"
-            }`}
-            style={{
-              color: "#374151",
-              border: "2px solid transparent",
-              backgroundImage: `
-                linear-gradient(
-                  ${lokasiOpen ? "#F3EBFF" : "white"},
-                  ${lokasiOpen ? "#F3EBFF" : "white"}
-                ),
-                ${SEARCH_BORDER_GRADIENT}
-              `,
-              backgroundOrigin: "border-box",
-              backgroundClip: "padding-box, border-box",
-            }}
-          >
-            <GradientIcon type="mapPin" size={16} />
-            {selectedLokasi}
-          </button>
-
-          {lokasiOpen && (
-            <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl p-4 z-50 max-h-96 flex flex-col">
-              <div className="flex items-center gap-2 rounded-full border-2 border-[#7C3AED] px-4 py-2 mb-3 shrink-0">
-                <input
-                  autoFocus
-                  value={lokasiQuery}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLokasiQuery(e.target.value)}
-                  placeholder="Cari Nama Kota"
-                  className="flex-1 outline-none bg-transparent text-sm text-[#6D28D9]"
-                />
-                <GradientIcon type="search" size={16} />
-              </div>
-
-              <div className="overflow-y-auto pr-1">
-                <button
-                  onClick={() => {
-                    setSelectedLokasi("Semua Lokasi");
-                    setLokasiOpen(false);
-                    setLokasiQuery("");
-                  }}
-                  className="w-full text-left text-sm font-semibold py-1.5 px-1 rounded hover:bg-pink-50"
-                  style={{ color: "#E91E8C" }}
-                >
-                  Semua Lokasi
-                </button>
-
-                {Object.keys(groupedKota).length === 0 && (
-                  <p className="text-xs text-gray-400 px-1 py-2">Kota tidak ditemukan</p>
-                )}
-
-                {Object.entries(groupedKota).map(([letter, kotas]) => (
-                  <div key={letter} className="mb-2">
-                    <div className="text-xs font-bold text-gray-800 px-1 pt-1 pb-0.5">{letter}</div>
-                    {kotas.map((kota: string) => (
-                      <button
-                        key={kota}
-                        onClick={() => {
-                          setSelectedLokasi(kota);
-                          setLokasiOpen(false);
-                          setLokasiQuery("");
-                        }}
-                        className="w-full text-left text-sm text-gray-700 py-1.5 px-2 rounded hover:bg-purple-50"
-                      >
-                        {kota}
-                      </button>
-                    ))}
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      No. Telepon
+                    </label>
+                    <input
+                      type="tel"
+                      value={noTelp}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setNoTelp(e.target.value)
+                      }
+                      placeholder="Contoh: 08123456789"
+                      className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs text-gray-900 outline-none transition-colors focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                    />
                   </div>
-                ))}
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Nama Lengkap
+                    </label>
+                    <input
+                      type="text"
+                      value={namaLengkap}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setNamaLengkap(e.target.value)
+                      }
+                      placeholder="Nama sesuai pemesanan"
+                      className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs text-gray-900 outline-none transition-colors focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleLihatPembelian}
+                    className="mt-2 w-full rounded-full py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-95 active:scale-[0.99] cursor-pointer"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, #7C3AED 0%, #E91E8C 100%)",
+                    }}
+                  >
+                    Lihat Pembelian
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* AKUN */}
-        <div className="relative shrink-0" ref={akunRef}>
-          <button
-            onClick={() => {
-              setAkunOpen((v) => !v);
-              setPembelianOpen(false);
-              setLokasiOpen(false);
-            }}
-            className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-90 transition-opacity"
-            style={{ background: AKUN_GRADIENT }}
-          >
-            <GradientIcon type="user" size={16} color="#ffffff" />
-            Akun
-          </button>
+          {/* TOMBOL LOKASI */}
+          <div className="relative" ref={lokasiRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setLokasiOpen((v) => !v);
+                setPembelianOpen(false);
+                setAkunOpen(false);
+              }}
+              className={`flex h-[44px] items-center gap-2 rounded-full px-4 text-xs sm:text-sm font-semibold transition-all duration-200 border cursor-pointer ${
+                lokasiOpen
+                  ? "border-[#7C3AED] bg-[#FAF5FF] text-[#7C3AED] shadow-2xs"
+                  : "border-gray-200/90 bg-white text-gray-700 hover:border-purple-300 hover:bg-[#FAF8FE] hover:text-[#7C3AED]"
+              }`}
+            >
+              <MapPin className="h-4 w-4 text-[#E91E8C]" />
+              <span className="max-w-[110px] truncate">{selectedLokasi}</span>
+              <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+            </button>
 
-          {akunOpen && (
-            <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3">
-              <button
-                onClick={() => goTo("/auth/register")}
-                className="w-full rounded-lg border-2 py-2.5 text-sm font-semibold hover:bg-pink-50 transition-colors"
-                style={{ borderColor: "#E91E8C", color: "#6D28D9" }}
-              >
-                Buat Akun Anda
-              </button>
-              <button
-                onClick={() => goTo("/auth/login")}
-                className="w-full rounded-lg border-2 py-2.5 text-sm font-semibold hover:bg-purple-50 transition-colors"
-                style={{ borderColor: "#E91E8C", color: "#6D28D9" }}
-              >
-                Masuk Akun Anda
-              </button>
-            </div>
-          )}
+            {lokasiOpen && (
+              <div className="absolute right-0 mt-2.5 w-72 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl z-50 max-h-96 flex flex-col">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-100 mb-3">
+                  <h4 className="text-xs font-bold text-gray-800">Pilih Lokasi</h4>
+                  <button
+                    onClick={() => setLokasiOpen(false)}
+                    className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-1.5 mb-3 bg-gray-50/70 focus-within:bg-white focus-within:border-[#7C3AED]">
+                  <input
+                    autoFocus
+                    value={lokasiQuery}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setLokasiQuery(e.target.value)
+                    }
+                    placeholder="Cari nama kota..."
+                    className="w-full outline-none bg-transparent text-xs text-gray-800"
+                  />
+                  {lokasiQuery && (
+                    <button
+                      onClick={() => setLokasiQuery("")}
+                      className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="overflow-y-auto pr-1 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedLokasi("Semua Lokasi");
+                      setLokasiOpen(false);
+                      setLokasiQuery("");
+                    }}
+                    className={`w-full text-left text-xs font-semibold py-2 px-2.5 rounded-lg transition-colors mb-1 cursor-pointer ${
+                      selectedLokasi === "Semua Lokasi"
+                        ? "bg-purple-50 text-[#7C3AED]"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    Semua Lokasi
+                  </button>
+
+                  {Object.keys(groupedKota).length === 0 && (
+                    <p className="text-xs text-gray-400 px-2 py-3 text-center">
+                      Kota tidak ditemukan
+                    </p>
+                  )}
+
+                  {Object.entries(groupedKota).map(([letter, kotas]) => (
+                    <div key={letter} className="mb-2">
+                      <div className="text-[10px] font-bold text-gray-400 px-2 pt-1 uppercase tracking-wider">
+                        {letter}
+                      </div>
+                      {kotas.map((kota: string) => (
+                        <button
+                          key={kota}
+                          type="button"
+                          onClick={() => {
+                            setSelectedLokasi(kota);
+                            setLokasiOpen(false);
+                            setLokasiQuery("");
+                          }}
+                          className={`w-full text-left text-xs py-1.5 px-2.5 rounded-lg transition-colors cursor-pointer ${
+                            selectedLokasi === kota
+                              ? "bg-purple-50 text-[#7C3AED] font-semibold"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {kota}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* TOMBOL AKUN (Gradient ungu-pink khas Cuantix) */}
+          <div className="relative" ref={akunRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setAkunOpen((v) => !v);
+                setPembelianOpen(false);
+                setLokasiOpen(false);
+              }}
+              className="flex h-[44px] items-center gap-2 rounded-full px-5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md hover:opacity-95 active:scale-[0.98] cursor-pointer"
+              style={{
+                background: "linear-gradient(90deg, #7C3AED 0%, #E91E8C 100%)",
+              }}
+            >
+              <User className="h-4 w-4" />
+              <span>Akun</span>
+            </button>
+
+            {akunOpen && (
+              <div className="absolute right-0 mt-2.5 w-60 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl z-50 flex flex-col gap-2.5">
+                <div className="px-1 pb-1 border-b border-gray-100">
+                  <p className="text-xs font-bold text-gray-900">Halo, Cuantixer!</p>
+                  <p className="text-[11px] text-gray-500">
+                    Masuk untuk akses tiket & promo
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => goTo("/auth/login")}
+                  className="w-full rounded-xl py-2 text-xs font-semibold text-white transition-opacity hover:opacity-95 cursor-pointer"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #7C3AED 0%, #E91E8C 100%)",
+                  }}
+                >
+                  Masuk Akun
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goTo("/auth/register")}
+                  className="w-full rounded-xl border border-gray-200 py-2 text-xs font-semibold text-gray-700 transition-colors hover:border-[#7C3AED] hover:bg-purple-50/50 hover:text-[#7C3AED] cursor-pointer"
+                >
+                  Daftar Akun Baru
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      </nav>
-    </div>
+      </div>
+
+      {/* MOBILE SEARCH BAR (Tampil hanya di layar kecil) */}
+      <div className="block sm:hidden px-5 pb-3.5">
+        <SearchBar />
+      </div>
+    </header>
   );
 }

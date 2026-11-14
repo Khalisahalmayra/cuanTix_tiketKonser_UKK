@@ -2,12 +2,11 @@
 
 import React, { useState, useRef, useEffect, RefObject } from "react";
 import { useRouter } from "next/navigation";
-import { Search, TrendingUp, X } from "lucide-react";
+import Image from "next/image";
+import { Search, X } from "lucide-react";
 import GradientIcon from "@/components/icon/GradientIcon";
 
-const SEARCH_BORDER_GRADIENT = "linear-gradient(90deg,#7C3AED 0%,#E91E8C 100%)";
-
-// TODO: ganti dengan data dari API
+// Data event banyak dicari
 const EVENT_BANYAK_DICARI: string[] = [
   "ENHYPEN JAKARTA 2027",
   "BTS JAKARTA 2026",
@@ -24,7 +23,7 @@ type EventTerlaris = {
   href: string;
 };
 
-// TODO: ganti dengan data dari API
+// Data event terlaris
 const EVENT_TERLARIS: EventTerlaris[] = [
   {
     title: "Senada Indonesia - 2026",
@@ -61,7 +60,7 @@ type SearchBarProps = {
 };
 
 export default function SearchBar({
-  placeholder = "Cari Konser",
+  placeholder = "Cari konser, artis, atau kota favoritmu...",
   onOpenChange,
 }: SearchBarProps) {
   const router = useRouter();
@@ -97,15 +96,16 @@ export default function SearchBar({
   }
 
   return (
-    <div ref={wrapperRef} className="relative flex-1 min-w-[200px]">
-      {/* INPUT */}
+    <div ref={wrapperRef} className="relative w-full">
+      {/* INPUT CONTAINER (Height 48px - 50px) */}
       <div
-        className="flex items-center gap-2 rounded-[12px] px-5 py-2.5"
-        style={{
-          border: "2px solid transparent",
-          background: `linear-gradient(white, white) padding-box, ${SEARCH_BORDER_GRADIENT} border-box`,
-        }}
+        className={`flex h-[48px] sm:h-[50px] items-center gap-3 rounded-full border px-4 text-sm transition-all duration-200 ${
+          open
+            ? "border-[#7C3AED] bg-white ring-2 ring-[#7C3AED]/15 shadow-sm"
+            : "border-gray-200/90 bg-gray-50/80 hover:border-gray-300 hover:bg-white"
+        }`}
       >
+        <Search className="h-4 w-4 shrink-0 text-[#7C3AED]" />
         <input
           value={query}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
@@ -115,48 +115,46 @@ export default function SearchBar({
             if (e.key === "Escape") setOpenState(false);
           }}
           placeholder={placeholder}
-          className="flex-1 outline-none bg-transparent text-sm"
-          style={{ color: "#6D28D9" }}
+          className="flex-1 bg-transparent text-xs sm:text-sm text-gray-800 placeholder-gray-400 outline-none"
         />
-        <button
-          type="button"
-          onClick={() => submitSearch(query)}
-          aria-label="Cari"
-          className="shrink-0"
-        >
-          <Search className="w-5 h-5" style={{ color: "#7C3AED" }} />
-        </button>
-      </div>
-
-      {/* PANEL */}
-      {open && (
-        <div
-          className="absolute left-0 top-full z-50 mt-3 w-full min-w-[320px] rounded-2xl bg-white p-5 shadow-2xl sm:p-6"
-          style={{
-            border: "1.5px solid transparent",
-            background: `linear-gradient(white, white) padding-box, ${SEARCH_BORDER_GRADIENT} border-box`,
-          }}
-        >
+        {query && (
           <button
             type="button"
-            onClick={() => setOpenState(false)}
-            aria-label="Tutup"
-            className="absolute right-5 top-5 text-[#9D1B7E] hover:opacity-70"
+            onClick={() => setQuery("")}
+            className="text-gray-400 hover:text-gray-600 cursor-pointer p-0.5"
+            aria-label="Hapus kata kunci"
           >
-            <X className="h-5 w-5" strokeWidth={3} />
+            <X className="h-4 w-4" />
           </button>
+        )}
+      </div>
+
+      {/* PANEL POPUP */}
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-2.5 w-full min-w-[300px] sm:min-w-[380px] md:min-w-[440px] rounded-2xl border border-gray-100 bg-white p-4 shadow-xl sm:p-5">
+          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Pencarian Konser
+            </span>
+            <button
+              type="button"
+              onClick={() => setOpenState(false)}
+              aria-label="Tutup"
+              className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
 
           {/* EVENT BANYAK DICARI */}
           {filteredPopular.length > 0 && (
-            <div className="mb-6">
-              <div className="mb-3 flex items-center gap-2 pr-8">
-                <GradientIcon type="trending" size={23} />
-                <h4 className="text-sm font-semibold" style={{ color: "black" }}>
-                  Event Banyak Dicari
-                </h4>
+            <div className="mt-3.5 mb-4">
+              <div className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-gray-800">
+                <GradientIcon type="trending" size={16} />
+                <span>Event Banyak Dicari</span>
               </div>
 
-              <div className="flex flex-wrap gap-2.5 sm:pl-7">
+              <div className="flex flex-wrap gap-2">
                 {filteredPopular.map((item) => (
                   <button
                     key={item}
@@ -165,12 +163,7 @@ export default function SearchBar({
                       setQuery(item);
                       submitSearch(item);
                     }}
-                    className="rounded-lg px-4 py-1.5 text-[11px] font-bold transition-colors hover:bg-[#F3EBFF]"
-                    style={{
-                      color: "#4C1D95",
-                      background: `linear-gradient(#F7F0FF, #F7F0FF) padding-box, ${SEARCH_BORDER_GRADIENT} border-box`,
-                      border: "1px solid transparent",
-                    }}
+                    className="rounded-full border border-purple-100 bg-purple-50/60 px-3 py-1 text-xs font-medium text-[#6D28D9] transition-all hover:border-purple-300 hover:bg-purple-100/70 cursor-pointer"
                   >
                     {item}
                   </button>
@@ -180,51 +173,41 @@ export default function SearchBar({
           )}
 
           {/* EVENT KONSER TERLARIS */}
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <GradientIcon type="trending" size={23} />
-              <h4 className="text-sm font-semibold" style={{ color: "black" }}>
-                Event Konser Terlaris
-              </h4>
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <div className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-gray-800">
+              <GradientIcon type="trending" size={16} />
+              <span>Event Konser Terlaris</span>
             </div>
 
             {filteredTerlaris.length === 0 ? (
-              <p className="px-1 py-2 text-xs text-gray-400">Event tidak ditemukan</p>
+              <p className="py-2 text-xs text-gray-400">Event tidak ditemukan</p>
             ) : (
-              <div className="flex max-h-[320px] flex-col gap-4 overflow-y-auto p-1 sm:pl-8">
+              <div className="flex max-h-[260px] flex-col gap-2 overflow-y-auto pr-1">
                 {filteredTerlaris.map((event, index) => (
                   <button
                     key={`${event.title}-${index}`}
                     type="button"
                     onClick={() => goToEvent(event.href)}
-                    className="flex w-full items-center gap-4 rounded-lg bg-white p-3 text-left shadow-md transition-shadow hover:shadow-lg"
-                    style={{
-                      border: "1px solid transparent",
-                      background: `linear-gradient(white, white) padding-box, ${SEARCH_BORDER_GRADIENT} border-box`,
-                    }}
+                    className="group flex w-full items-center gap-3 rounded-xl border border-gray-100 p-2 text-left transition-all hover:border-purple-200 hover:bg-purple-50/40 cursor-pointer"
                   >
-                    <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl"
-                      style={{ border: "1.5px solid #7C3AED", color: "#7C3AED" }}
-                    >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-xs font-bold text-[#7C3AED]">
                       {index + 1}
                     </span>
 
-                    <img
+                    <Image
                       src={event.image}
                       alt={event.title}
-                      className="h-[54px] w-[106px] shrink-0 rounded object-cover"
+                      width={64}
+                      height={40}
+                      className="h-10 w-16 shrink-0 rounded-lg object-cover"
                     />
 
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-bold text-gray-900">
+                      <span className="block truncate text-xs font-semibold text-gray-900 group-hover:text-[#7C3AED] transition-colors">
                         {event.title}
                       </span>
-                      <span className="block truncate text-[11px] text-gray-800">
-                        {event.organizer}
-                      </span>
-                      <span className="block truncate text-[11px] text-gray-800">
-                        {event.location}
+                      <span className="block truncate text-[11px] text-gray-500">
+                        {event.organizer} · {event.location}
                       </span>
                     </span>
                   </button>

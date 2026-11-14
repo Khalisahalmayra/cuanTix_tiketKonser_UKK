@@ -27,7 +27,11 @@ export default function AdminLayout({
     }
   }, [router]);
 
-  if (!allowed) return null;
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.replace("/auth/login");
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-900">
@@ -52,6 +56,14 @@ export default function AdminLayout({
           >
             Lihat Situs
           </Link>
+
+                    <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-6 block w-full rounded-lg px-3 py-2 text-left text-red-300 hover:bg-white/10"
+          >
+            Keluar
+          </button>
         </nav>
       </aside>
 

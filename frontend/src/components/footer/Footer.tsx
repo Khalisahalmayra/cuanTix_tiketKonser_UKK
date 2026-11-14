@@ -1,12 +1,11 @@
 import Image from "next/image";
-
+import Link from "next/link";
 import GradientIcon, { type GradientIconType } from "@/components/icon/GradientIcon";
 
-const GRADIENT =
-  "linear-gradient(90deg, #7C3AED 0%, #E91E8C 100%)";
+const GRADIENT = "linear-gradient(90deg, #7C3AED 0%, #E91E8C 100%)";
 
 const PAYMENT_METHODS = [
-  { name: "BRI", image: "/image/payment/bri.png" },
+  { name: "QRIS", image: "/image/payment/qris.png" },
   { name: "BCA", image: "/image/payment/bca.png" },
   { name: "Mandiri", image: "/image/payment/mandiri.png" },
   { name: "BRI", image: "/image/payment/bri.png" },
@@ -16,317 +15,155 @@ const PAYMENT_METHODS = [
   { name: "Permata", image: "/image/payment/permata.png" },
   { name: "VISA", image: "/image/payment/visa.png" },
   { name: "Mastercard", image: "/image/payment/mastercard.png" },
-  { name: "QRIS", image: "/image/payment/qris.png" },
+  { name: "ShopeePay", image: "/image/payment/spay.png" },
   { name: "Gopay", image: "/image/payment/gopay.png" },
   { name: "Indodana", image: "/image/payment/indodana.png" },
   { name: "senangPay", image: "/image/payment/senangpay.png" },
-  { name: "indomaret", image: "/image/payment/indomaret.png" },
+  { name: "Indomaret", image: "/image/payment/indomaret.png" },
   { name: "Alfamart", image: "/image/payment/alfamart.png" },
 ];
 
-const SOCIALS: { name: string; type: GradientIconType }[] = [
-  { name: "Instagram", type: "instagram" },
-  { name: "TikTok", type: "tiktok" },
-  { name: "X", type: "x" },
-  { name: "Facebook", type: "facebook" },
-  { name: "YouTube", type: "youtube" },
-  { name: "LinkedIn", type: "linkedin" },
+const SOCIALS: { name: string; type: GradientIconType; href: string }[] = [
+  { name: "Instagram", type: "instagram", href: "#" },
+  { name: "TikTok", type: "tiktok", href: "#" },
+  { name: "X", type: "x", href: "#" },
+  { name: "Facebook", type: "facebook", href: "#" },
+  { name: "YouTube", type: "youtube", href: "#" },
+  { name: "LinkedIn", type: "linkedin", href: "#" },
 ];
+
+const HEADING =
+  "bg-gradient-to-r from-[#7C3AED] to-[#E91E8C] bg-clip-text text-sm font-bold text-transparent";
+const LINK = "text-[13px] font-medium text-gray-900 transition-colors hover:text-[#E91E8C]";
+const BOX_BORDER = "1px solid #C084FC";
 
 export default function Footer() {
   return (
-    <footer
-      className="mx-4 mb-4 mt-10 rounded-[10px] bg-white px-8 pt-8 pb-4 sm:mx-6 lg:mx-14"
-      style={{
-        border: "1.5px solid transparent",
-        backgroundImage: `
-          linear-gradient(white, white),
-          ${GRADIENT}
-        `,
-        backgroundOrigin: "border-box",
-        backgroundClip: "padding-box, border-box",
-      }}
-    >
-      {/* ================= TOP CONTENT ================= */}
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr_1fr_1.1fr]">
+    <footer className="mt-16 w-full bg-white px-4 pb-6 sm:px-8 lg:px-16">
+      {/* BORDER GRADIENT */}
+      <div
+        className="rounded-2xl p-[1.5px]"
+        style={{ backgroundImage: GRADIENT }}
+      >
+        <div className="rounded-[14px] bg-white px-6 py-8 sm:px-8">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1.1fr]">
+            {/* ===== KOLOM 1: BRAND ===== */}
+            <div>
+            <Image
+              src="/image/logo-cuantix.png"
+              alt="Cuantix"
+              width={220}
+              height={60}
+              className="h-12 w-auto object-contain sm:h-14"
+            />
+              <p className="mt-4 max-w-[220px] text-[13px] leading-relaxed text-gray-900">
+                Temukan konser favoritmu, pesan tiket dengan mudah, dan nikmati
+                setiap momen bersama Cuantix.
+              </p>
 
-        {/* ================= BRAND ================= */}
-        <div>
-          <Image
-            src="/image/logo-cuantix.png"
-            alt="Cuantix"
-            width={155}
-            height={50}
-            className="h-auto w-[150px] object-contain"
-          />
-
-          <p className="mt-5 max-w-[230px] text-[16px] leading-[1.45] text-gray-900">
-            Temukan konser favoritmu,
-            <br />
-            pesan tiket dengan mudah,
-            <br />
-            dan nikmati setiap momen
-            <br />
-            bersama Cuantix.
-          </p>
-
-          {/* ================= KEAMANAN ================= */}
-          <div className="mt-10">
-            <h3 className="text-[16px] font-bold">
-              <span
-                style={{
-                  background: GRADIENT,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Keamanan Dan Privasi
-              </span>
-            </h3>
-
-            <div className="mt-5 flex justify-center">
-              <GradientIcon type="shieldCheck" size={48} />
-            </div>
-          </div>
-
-          {/* ================= APP DOWNLOAD ================= */}
-          <div className="mt-10">
-            <h3 className="text-[16px] font-bold">
-              <span
-                style={{
-                  background: GRADIENT,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Temukan Kami:
-              </span>
-            </h3>
-
-            <div className="mt-5 flex gap-2">
-              <Image
-                src="/image/appstore.png"
-                alt="Download on App Store"
-                width={165}
-                height={50}
-                className="h-[46px] w-auto object-contain"
-              />
-
-              <Image
-                src="/image/googleplay.png"
-                alt="Get it on Google Play"
-                width={165}
-                height={50}
-                className="h-[46px] w-auto object-contain"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* ================= TENTANG ================= */}
-        <div>
-          <h3
-            className="text-[16px] font-bold"
-            style={{
-              background: GRADIENT,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Tentang Cuantix
-          </h3>
-
-          <div className="mt-3 space-y-3 text-[15px] text-gray-900">
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Tentang Kami
-            </a>
-
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Blog
-            </a>
-          </div>
-
-          {/* ================= SOCIAL ================= */}
-          <div className="mt-10">
-            <h3
-              className="text-[16px] font-bold"
-              style={{
-                background: GRADIENT,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Update Kami
-            </h3>
-
-            <div className="mt-4 flex flex-wrap gap-3">
-              {SOCIALS.map((social) => {
-                return (
-                  <a
-                    key={social.name}
-                    href="#"
-                    aria-label={social.name}
-                    className="flex h-11 w-11 items-center justify-center rounded-[5px] border-2 border-transparent bg-white transition-all duration-200 hover:bg-[#F3EBFF] hover:-translate-y-0.5"
-                    style={{
-                      backgroundImage: `
-                        linear-gradient(white, white),
-                        ${GRADIENT}
-                      `,
-                      backgroundOrigin: "border-box",
-                      backgroundClip: "padding-box, border-box",
-                    }}
-                  >
-                    <GradientIcon type={social.type} size={24} />
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* ================= BUAT EVENT ================= */}
-        <div>
-          <h3
-            className="text-[16px] font-bold"
-            style={{
-              background: GRADIENT,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Buat Event
-          </h3>
-
-          <div className="mt-3 space-y-3 text-[15px] text-gray-900">
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Biaya
-            </a>
-
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Kerjasama Dengan
-              <br />
-              Kami
-            </a>
-
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Buku Panduan Kreator
-            </a>
-          </div>
-        </div>
-
-        {/* ================= DUKUNGAN ================= */}
-        <div>
-          <h3
-            className="text-[16px] font-bold"
-            style={{
-              background: GRADIENT,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Dukungan
-          </h3>
-
-          <div className="mt-3 space-y-3 text-[15px] text-gray-900">
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Pusat Bantuan
-            </a>
-
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Syarat & Ketentuan
-            </a>
-
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Kebijakan Privasi
-            </a>
-
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Kepatuhan Keamanan
-              <br />
-              & Privasi
-            </a>
-
-            <a
-              href="#"
-              className="block transition-colors hover:text-[#E91E8C]"
-            >
-              Kebijakan Cookies
-            </a>
-          </div>
-        </div>
-
-        {/* ================= PAYMENT ================= */}
-        <div>
-          <h3
-            className="text-[16px] font-bold"
-            style={{
-              background: GRADIENT,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Pilihan Pembayaran
-          </h3>
-
-          <div className="mt-3 grid grid-cols-4 gap-2">
-            {PAYMENT_METHODS.map((payment, index) => (
-              <div
-                key={`${payment.name}-${index}`}
-                className="flex h-[44px] items-center justify-center rounded-[4px] border-2 border-transparent bg-white p-1 transition-all duration-200 hover:bg-[#F3EBFF]"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(white, white),
-                    ${GRADIENT}
-                  `,
-                  backgroundOrigin: "border-box",
-                  backgroundClip: "padding-box, border-box",
-                }}
-              >
-                <Image
-                  src={payment.image}
-                  alt={payment.name}
-                  width={45}
-                  height={28}
-                  className="max-h-[28px] w-auto object-contain"
-                />
+              <h4 className={`${HEADING} mt-8`}>Keamanan Dan Privasi</h4>
+              <div className="mt-3">
+                <GradientIcon type="shieldCheck" size={40} />
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* ================= COPYRIGHT ================= */}
-      <div className="mt-12 flex justify-center pt-2">
-        <p className="text-[15px] font-semibold text-gray-900">
-          © Cuantix Team. All Rights Reserved.
-        </p>
+              <h4 className={`${HEADING} mt-6`}>Temukan Kami:</h4>
+              <div className="mt-3 flex items-center gap-2.5">
+                <a href="#" className="transition-opacity hover:opacity-85">
+                  <Image
+                    src="/image/appstore.png"
+                    alt="Download on App Store"
+                    width={120}
+                    height={36}
+                    className="h-9 w-auto object-contain"
+                  />
+                </a>
+                <a href="#" className="transition-opacity hover:opacity-85">
+                  <Image
+                    src="/image/googleplay.png"
+                    alt="Get it on Google Play"
+                    width={120}
+                    height={36}
+                    className="h-9 w-auto object-contain"
+                  />
+                </a>
+              </div>
+            </div>
+
+            {/* ===== KOLOM 2: TENTANG + SOSMED ===== */}
+            <div>
+              <h4 className={HEADING}>Tentang Cuantix</h4>
+              <ul className="mt-3 space-y-2.5">
+                <li><a href="#" className={LINK}>Tentang Kami</a></li>
+                <li><a href="#" className={LINK}>Blog</a></li>
+              </ul>
+
+              <h4 className={`${HEADING} mt-8`}>Update Kami</h4>
+              <div className="mt-3 flex max-w-[260px] flex-wrap gap-2">
+                {SOCIALS.map((s) => (
+                  <a
+                    key={s.name}
+                    href={s.href}
+                    aria-label={s.name}
+                    className="flex h-9 w-9 items-center justify-center rounded-md bg-white transition-transform hover:-translate-y-0.5"
+                    style={{ border: BOX_BORDER }}
+                  >
+                    <GradientIcon type={s.type} size={20} />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* ===== KOLOM 3: BUAT EVENT ===== */}
+            <div>
+              <h4 className={HEADING}>Buat Event</h4>
+              <ul className="mt-3 space-y-2.5">
+                <li><a href="#" className={LINK}>Biaya</a></li>
+                <li><a href="#" className={LINK}>Kerjasama Dengan Kami</a></li>
+                <li><a href="#" className={LINK}>Buku Panduan Kreator</a></li>
+              </ul>
+            </div>
+
+            {/* ===== KOLOM 4: DUKUNGAN ===== */}
+            <div>
+              <h4 className={HEADING}>Dukungan</h4>
+              <ul className="mt-3 space-y-2.5">
+                <li><a href="#" className={LINK}>Pusat Bantuan</a></li>
+                <li><a href="#" className={LINK}>Syarat & Ketentuan</a></li>
+                <li><a href="#" className={LINK}>Kebijakan Privasi</a></li>
+                <li><a href="#" className={LINK}>Kepatuhan Keamanan & Privasi</a></li>
+                <li><a href="#" className={LINK}>Kebijakan Cookies</a></li>
+              </ul>
+            </div>
+
+            {/* ===== KOLOM 5: PEMBAYARAN ===== */}
+            <div>
+              <h4 className={HEADING}>Pilihan Pembayaran</h4>
+              <div className="mt-3 grid max-w-[260px] grid-cols-4 gap-2">
+                {PAYMENT_METHODS.map((p) => (
+                  <div
+                    key={p.name}
+                    title={p.name}
+                    className="flex h-9 items-center justify-center rounded-md bg-white p-1"
+                    style={{ border: BOX_BORDER }}
+                  >
+                    <Image
+                      src={p.image}
+                      alt={p.name}
+                      width={40}
+                      height={20}
+                      className="max-h-5 w-auto object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ===== COPYRIGHT ===== */}
+          <p className="mt-10 text-center text-xs font-bold text-gray-900">
+            © {new Date().getFullYear()} Cuantix Team. All Rights Reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );
