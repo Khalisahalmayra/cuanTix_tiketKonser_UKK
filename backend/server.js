@@ -5,6 +5,7 @@ const supabase = require("./config/database");
 const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/events");
 const adminRoutes = require("./routes/admin");
+const orderRoutes = require("./routes/orders");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/orders", orderRoutes);
 
 // KATEGORI
 app.get("/api/categories", async (req, res) => {

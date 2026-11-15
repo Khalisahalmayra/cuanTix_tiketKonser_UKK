@@ -49,4 +49,45 @@ router.get("/", async (req, res) => {
   res.json(events);
 });
 
+// GET /api/events/:slug -> detail satu event + jenis tiket
+router.get("/:slug", async (req, res) => {
+  const { data, error } = await supabase
+    .from("events")
+    .select(
+      "id, title, slug, description, banner_url, poster_url, city, venue, start_at, status, categories(name), organizers(name), ticket_types(id, name, price, quota, sold)"
+    )
+    .eq("slug", req.params.slug)
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (error) {
+    return res
+      .status(500)
+      .json({ message: "Gagal mengambil event", error: error.message });
+  }
+  if (!data) {
+    return res.status(404).json({ message: "Event tidak ditemukan" });
+  }
+
+  res.json({
+    id: data.id,
+    slug: data.slug,
+    title: data.title,
+    description: data.description,
+    image: data.banner_url,
+    poster: data.poster_url,
+    city: data.city,
+    venue: data.venue,
+    date: data.start_at,
+    category: data.categories?.name || "",
+    organizer: data.organizers?.name || "",
+    tickets: (data.ticket_types || []).map((t) => ({
+      id: t.id,
+      name: t.name,
+      price: t.price,
+      available: t.quota - t.sold,
+    })),
+  });
+});
+
 module.exports = router;
