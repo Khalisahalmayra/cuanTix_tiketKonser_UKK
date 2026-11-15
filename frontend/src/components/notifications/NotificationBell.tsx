@@ -7,7 +7,6 @@ import NotificationItem from "./NotificationItem";
 import { useNotifications } from "./useNotifications";
 import type { NotificationView } from "./data";
 
-const BORDER_GRADIENT = "linear-gradient(90deg,#7C3AED 0%,#E91E8C 100%)";
 const MAX_PREVIEW = 5;
 
 type NotificationBellProps = {
@@ -48,17 +47,13 @@ export default function NotificationBell({ allHref = "/notifikasi" }: Notificati
         aria-label={
           unreadCount > 0 ? `Notifikasi, ${unreadCount} belum dibaca` : "Notifikasi"
         }
-        className="relative flex h-[44px] w-[44px] items-center justify-center rounded-[12px] transition-colors hover:bg-[#F3EBFF]"
-        style={{
-          border: "2px solid transparent",
-          backgroundImage: `linear-gradient(${open ? "#F3EBFF" : "white"}, ${
-            open ? "#F3EBFF" : "white"
-          }), ${BORDER_GRADIENT}`,
-          backgroundOrigin: "border-box",
-          backgroundClip: "padding-box, border-box",
-        }}
+        className={`relative flex h-[44px] w-[44px] items-center justify-center rounded-full border transition-all duration-200 cursor-pointer ${
+          open
+            ? "border-[#7C3AED] bg-[#FAF5FF] shadow-2xs"
+            : "border-gray-200/90 bg-white hover:border-purple-300 hover:bg-[#FAF8FE]"
+        }`}
       >
-        <GradientIcon type="bell" size={22} />
+        <GradientIcon type="bell" size={20} />
 
         {unreadCount > 0 && (
           <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#E91E8C] px-1 text-[11px] font-bold leading-none text-white ring-2 ring-white">

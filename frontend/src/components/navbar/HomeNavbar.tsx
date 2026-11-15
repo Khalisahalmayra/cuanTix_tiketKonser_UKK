@@ -78,20 +78,17 @@ function buildEmailLink(nama: string): string {
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-// Gradasi tombol Akun
-const AKUN_GRADIENT = "linear-gradient(180deg,#5B1AA8 0%,#8A2A9C 55%,#E2408A 100%)";
-// Gradasi border (ungu -> pink)
+// Gradasi ungu -> pink (tombol Akun, sama seperti navbar landing)
 const SEARCH_BORDER_GRADIENT = "linear-gradient(90deg,#7C3AED 0%,#E91E8C 100%)";
 
-// Style tombol ikon dengan border gradasi (dipakai tombol bantuan)
-function gradientBorderStyle(active: boolean): React.CSSProperties {
-  const fill = active ? "#F3EBFF" : "white";
-  return {
-    border: "2px solid transparent",
-    backgroundImage: `linear-gradient(${fill}, ${fill}), ${SEARCH_BORDER_GRADIENT}`,
-    backgroundOrigin: "border-box",
-    backgroundClip: "padding-box, border-box",
-  };
+// Gaya tombol pill (bulat penuh, garis tipis abu-abu) sama seperti navbar landing.
+// Garis dan teks berubah ungu saat tombol aktif atau di-hover.
+function pillClass(active: boolean): string {
+  return `flex h-[44px] items-center gap-2 rounded-full border px-4 text-xs font-semibold transition-all duration-200 cursor-pointer sm:text-sm ${
+    active
+      ? "border-[#7C3AED] bg-[#FAF5FF] text-[#7C3AED] shadow-2xs"
+      : "border-gray-200/90 bg-white text-gray-700 hover:border-purple-300 hover:bg-[#FAF8FE] hover:text-[#7C3AED]"
+  }`;
 }
 
 function groupByLetter(list: string[]): GroupedKota {
@@ -251,10 +248,9 @@ export default function HomeNavbar() {
         {/* BUAT EVENT KAMU */}
         <button
           onClick={() => router.push(ROUTES.buatEvent)}
-          className="shrink-0 flex items-center gap-2 font-semibold text-sm px-3 py-2.5 rounded-[12px] hover:bg-[#F3EBFF] transition-colors"
-          style={{ color: "#E91E8C" }}
+          className={`shrink-0 ${pillClass(false)}`}
         >
-          <GradientIcon type="plusCircle" size={20} color="#4C1D95" />
+          <GradientIcon type="plusCircle" size={16} />
           Buat Event Kamu
         </button>
 
@@ -266,22 +262,7 @@ export default function HomeNavbar() {
               closeAll();
               setLokasiOpen(next);
             }}
-            className={`group relative flex items-center gap-2 font-semibold text-sm px-4 py-2.5 rounded-[12px] transition-all duration-200 ${
-              lokasiOpen ? "bg-[#F3EBFF]" : "bg-white hover:bg-[#F3EBFF]"
-            }`}
-            style={{
-              color: "#374151",
-              border: "2px solid transparent",
-              backgroundImage: `
-                linear-gradient(
-                  ${lokasiOpen ? "#F3EBFF" : "white"},
-                  ${lokasiOpen ? "#F3EBFF" : "white"}
-                ),
-                ${SEARCH_BORDER_GRADIENT}
-              `,
-              backgroundOrigin: "border-box",
-              backgroundClip: "padding-box, border-box",
-            }}
+            className={pillClass(lokasiOpen)}
           >
             <GradientIcon type="mapPin" size={16} />
             {selectedLokasi}
@@ -354,8 +335,11 @@ export default function HomeNavbar() {
             aria-label="Pusat Bantuan"
             aria-haspopup="menu"
             aria-expanded={helpOpen}
-            className="flex h-[44px] w-[44px] items-center justify-center rounded-[12px] transition-all duration-200 hover:bg-[#F3EBFF]"
-            style={gradientBorderStyle(helpOpen)}
+            className={`flex h-[44px] w-[44px] items-center justify-center rounded-full border transition-all duration-200 cursor-pointer ${
+              helpOpen
+                ? "border-[#7C3AED] bg-[#FAF5FF] shadow-2xs"
+                : "border-gray-200/90 bg-white hover:border-purple-300 hover:bg-[#FAF8FE]"
+            }`}
           >
             <GradientIcon type="help" size={20} />
           </button>
@@ -429,10 +413,10 @@ export default function HomeNavbar() {
             }}
             aria-haspopup="menu"
             aria-expanded={akunOpen}
-            className="flex items-center gap-2 rounded-[12px] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-90 transition-opacity"
-            style={{ background: AKUN_GRADIENT }}
+            className="flex h-[44px] items-center gap-2 rounded-full px-5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-95 hover:shadow-md active:scale-[0.98] cursor-pointer sm:text-sm"
+            style={{ background: SEARCH_BORDER_GRADIENT }}
           >
-            <GradientIcon type="user" size={20} color="#ffffff" />
+            <GradientIcon type="user" size={16} color="#ffffff" />
             Akun
           </button>
 

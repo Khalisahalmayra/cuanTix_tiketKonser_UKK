@@ -10,7 +10,7 @@ type EventCardProps = {
 export default function EventCard({ event }: EventCardProps) {
   return (
     <Link
-      href={`/event/${event.slug}`}
+      href={`/detail-tiket/${event.slug}`}
       className="group flex flex-col h-full overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-2xs transition-all duration-300 hover:-translate-y-1 hover:border-purple-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
     >
       {/* GAMBAR EVENT */}
