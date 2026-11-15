@@ -126,4 +126,132 @@ router.patch("/events/:id/status", async (req, res) => {
     res.json({ message: "Event berhasil dihapus" });
   });
 
+  const multer = require("multer");
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ok = ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype);
+    if (!ok) return cb(new Error("Format gambar harus JPG, PNG, atau WEBP"));
+    cb(null, true);
+  },
+});
+
+// POST /api/admin/upload -> upload gambar ke Supabase Storage
+router.post("/upload", (req, res) => {
+  upload.single("image")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({
+        message:
+          err.code === "LIMIT_FILE_SIZE"
+            ? "Ukuran gambar maksimal 2 MB"
+            : err.message,
+      });
+    }
+    if (!req.file) {
+      return res.status(400).json({ message: "Pilih gambar dulu" });
+    }
+
+    const ext = req.file.originalname.split(".").pop().toLowerCase();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from("event-images")
+      .upload(path, req.file.buffer, { contentType: req.file.mimetype });
+
+    if (error) {
+      return res.status(500).json({ message: "Gagal upload gambar", error: error.message });
+    }
+
+    const { data } = supabase.storage.from("event-images").getPublicUrl(path);
+    res.json({ url: data.publicUrl });
+  });
+});
+
+// GET /api/admin/events/:id -> data satu event untuk form edit
+router.get("/events/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("events")
+    .select(
+      "id, title, category_id, description, banner_url, city, venue, start_at, status, ticket_types(id, name, price, quota, sold)"
+    )
+    .eq("id", req.params.id)
+    .maybeSingle();
+
+  if (error) {
+    return res.status(500).json({ message: "Gagal mengambil event", error: error.message });
+  }
+  if (!data) {
+    return res.status(404).json({ message: "Event tidak ditemukan" });
+  }
+  res.json(data);
+});
+
+// PUT /api/admin/events/:id -> ubah event dan jenis tiketnya
+router.put("/events/:id", async (req, res) => {
+  const {
+    title, category_id, description, banner_url,
+    city, venue, start_at, tickets,
+  } = req.body;
+
+  if (!title || !city || !start_at) {
+    return res.status(400).json({ message: "Judul, kota, dan tanggal wajib diisi" });
+  }
+
+  const changes = {
+    title,
+    category_id: category_id || null,
+    description: description || null,
+    city,
+    venue: venue || null,
+    start_at,
+  };
+  if (banner_url) {
+    changes.banner_url = banner_url;
+    changes.poster_url = banner_url;
+  }
+
+  const { error } = await supabase
+    .from("events")
+    .update(changes)
+    .eq("id", req.params.id);
+
+  if (error) {
+    return res.status(500).json({ message: "Gagal mengubah event", error: error.message });
+  }
+
+  for (const t of tickets || []) {
+    const price = Number(t.price);
+    const quota = Number(t.quota);
+
+    if (t.id) {
+      const { data: cur } = await supabase
+        .from("ticket_types")
+        .select("sold")
+        .eq("id", t.id)
+        .eq("event_id", req.params.id)
+        .maybeSingle();
+
+      if (cur && quota < cur.sold) {
+        return res.status(400).json({
+          message: `Kuota "${t.name}" tidak boleh di bawah jumlah terjual (${cur.sold})`,
+        });
+      }
+      await supabase
+        .from("ticket_types")
+        .update({ name: t.name, price, quota })
+        .eq("id", t.id)
+        .eq("event_id", req.params.id);
+    } else if (t.name && price >= 0 && quota > 0) {
+      await supabase
+        .from("ticket_types")
+        .insert({ event_id: Number(req.params.id), name: t.name, price, quota });
+    }
+  }
+
+  res.json({ message: "Event berhasil diubah" });
+});
+
+
 module.exports = router;

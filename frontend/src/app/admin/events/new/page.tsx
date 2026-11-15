@@ -12,6 +12,8 @@ const KATEGORI = [
   { id: 5, name: "Jazz" },
 ];
 
+const API = "http://localhost:4000/api/admin";
+
 const INPUT =
   "w-full rounded-[10px] border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/30";
 const LABEL = "mb-1 block text-xs font-semibold text-gray-700";
@@ -32,6 +34,8 @@ export default function NewEventPage() {
   const [tickets, setTickets] = useState<TicketRow[]>([
     { name: "Regular", price: "", quota: "" },
   ]);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -55,6 +59,22 @@ export default function NewEventPage() {
   const removeTicket = (i: number) =>
     setTickets((rows) => rows.filter((_, idx) => idx !== i));
 
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) {
+      setError("Format gambar harus JPG, PNG, atau WEBP.");
+      return;
+    }
+    if (f.size > 2 * 1024 * 1024) {
+      setError("Ukuran gambar maksimal 2 MB.");
+      return;
+    }
+    setError("");
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -73,7 +93,24 @@ export default function NewEventPage() {
       setSaving(true);
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:4000/api/admin/events", {
+      let banner_url: string | undefined;
+      if (file) {
+        const fd = new FormData();
+        fd.append("image", file);
+        const up = await fetch(`${API}/upload`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        });
+        const upData = await up.json();
+        if (!up.ok) {
+          setError(upData.message || "Gagal upload gambar.");
+          return;
+        }
+        banner_url = upData.url;
+      }
+
+      const res = await fetch(`${API}/events`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -83,6 +120,7 @@ export default function NewEventPage() {
           ...form,
           category_id: Number(form.category_id),
           start_at: new Date(form.start_at).toISOString(),
+          banner_url,
           tickets: validTickets,
         }),
       });
@@ -117,6 +155,32 @@ export default function NewEventPage() {
         onSubmit={handleSubmit}
         className="mt-6 space-y-4 rounded-xl bg-white p-6 shadow-sm"
       >
+        <div>
+          <label className={LABEL}>Banner / Poster Event</label>
+          <label className="flex aspect-[2/1] cursor-pointer items-center justify-center overflow-hidden rounded-[10px] border-2 border-dashed border-gray-300 bg-gray-50 hover:border-[#7C3AED]">
+            {preview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={preview}
+                alt="Pratinjau banner"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="px-4 text-center text-xs text-gray-500">
+                Klik untuk memilih gambar
+                <br />
+                (JPG, PNG, atau WEBP, maks. 2 MB, disarankan landscape 2:1)
+              </span>
+            )}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleFile}
+              className="hidden"
+            />
+          </label>
+        </div>
+
         <div>
           <label className={LABEL}>Judul Event</label>
           <input
