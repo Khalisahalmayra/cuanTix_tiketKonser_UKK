@@ -233,18 +233,20 @@ export default function HomeNavbar() {
 
   return (
     <div style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }} className="relative z-40 w-full bg-white">
-      <nav className="w-full flex items-center gap-4 px-6 py-4 flex-wrap">
+      <nav className="mx-auto flex h-[82px] md:h-[88px] max-w-[1320px] items-center justify-between gap-4 px-5 sm:px-8 md:px-10 lg:gap-8 lg:px-14 xl:px-16">
         {/* LOGO */}
         <div className="flex items-center shrink-0">
           <img
             src="/image/logo-cuantix.png"
             alt="Cuantix"
-            className="h-18 w-auto shrink-0 object-contain"
+            className="h-12 w-auto shrink-0 object-contain md:h-14"
           />
         </div>
 
         {/* SEARCH */}
-        <SearchBar />
+        <div className="mx-auto hidden max-w-[420px] flex-1 sm:block lg:max-w-[460px]">
+  <SearchBar />
+</div>
 
         {/* BUAT EVENT KAMU */}
         <button
