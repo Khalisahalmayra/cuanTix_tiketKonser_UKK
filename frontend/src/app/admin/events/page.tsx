@@ -142,13 +142,21 @@ export default function AdminEventsPage() {
                       </select>
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => deleteEvent(e.id, e.title)}
-                        className="rounded-lg bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
-                      >
-                        Hapus
-                      </button>
+                    <div className="flex gap-2">
+                    <Link
+                      href={`/admin/events/${e.id}/edit`}
+                      className="rounded-lg bg-purple-50 px-3 py-1 text-xs font-semibold text-[#7C3AED] hover:bg-purple-100"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => deleteEvent(e.id, e.title)}
+                      className="rounded-lg bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                    >
+                      Hapus
+                    </button>
+                  </div>
                     </td>
                   </tr>
                 );

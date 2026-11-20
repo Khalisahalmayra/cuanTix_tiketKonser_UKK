@@ -5,46 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import SearchBar from "@/components/search/SearchBar";
 import { ChevronDown, MapPin, Receipt, User, X } from "lucide-react";
-
-const KOTA_LIST: string[] = [
-  "Jakarta",
-  "Surabaya",
-  "Bandung",
-  "Medan",
-  "Semarang",
-  "Makassar",
-  "Palembang",
-  "Tangerang",
-  "Depok",
-  "Bekasi",
-  "Bogor",
-  "Yogyakarta",
-  "Malang",
-  "Denpasar",
-  "Batam",
-  "Pekanbaru",
-  "Bandar Lampung",
-  "Padang",
-  "Banjarmasin",
-  "Samarinda",
-  "Balikpapan",
-  "Pontianak",
-  "Manado",
-  "Jayapura",
-];
-
-type GroupedKota = Record<string, string[]>;
-
-function groupByLetter(list: string[]): GroupedKota {
-  const sorted = [...list].sort((a, b) => a.localeCompare(b));
-  const groups: GroupedKota = {};
-  for (const kota of sorted) {
-    const letter = kota[0].toUpperCase();
-    if (!groups[letter]) groups[letter] = [];
-    groups[letter].push(kota);
-  }
-  return groups;
-}
+import { KOTA_LIST, groupByLetter, GroupedKota } from "@/data/cities";
 
 function useOutsideClose<T extends HTMLElement>(
   ref: RefObject<T | null>,

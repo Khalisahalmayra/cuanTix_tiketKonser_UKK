@@ -7,3 +7,7 @@
 !**/.env.example
 
 node_modules/
+
+backend/backups/
+backend/tools/
+scratch/
