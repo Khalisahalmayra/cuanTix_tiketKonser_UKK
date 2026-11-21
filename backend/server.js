@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/events");
 const adminRoutes = require("./routes/admin");
 const orderRoutes = require("./routes/orders");
+const eventSubmissionRoutes = require("./routes/event-submissions");
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/event-submissions", eventSubmissionRoutes);
 
 // KATEGORI
 app.get("/api/categories", async (req, res) => {
