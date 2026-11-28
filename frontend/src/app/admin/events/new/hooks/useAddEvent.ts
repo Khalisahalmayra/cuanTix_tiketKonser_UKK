@@ -260,15 +260,36 @@ export function useAddEvent() {
     setTicketToDelete(null);
   };
 
+  const findTicketByKeywords = (
+    availableTickets: TicketItem[],
+    keywords: string[],
+    fallbackIdx: number,
+    defaultName: string
+  ): string => {
+    for (const kw of keywords) {
+      const target = kw.toLowerCase();
+      const found = availableTickets.find((t) =>
+        t.name.trim().toLowerCase().includes(target)
+      );
+      if (found && found.name.trim()) {
+        return found.name.trim();
+      }
+    }
+    return availableTickets[fallbackIdx]?.name?.trim() || defaultName;
+  };
+
   // Seating Preset Changes
-  const applyPresetLayout = (preset: SeatingPreset) => {
+  const applyPresetLayout = (
+    preset: SeatingPreset,
+    ticketsList: TicketItem[] = tickets
+  ) => {
     setLayoutPreset(preset);
     if (preset === "standing_seated") {
       setZones([
         {
           id: "zone-1",
           name: "VIP Front Row",
-          ticketName: tickets[0]?.name || "VIP",
+          ticketName: findTicketByKeywords(ticketsList, ["vip"], 0, "VIP"),
           capacity: 250,
           color: "#7C3AED",
           x: 230,
@@ -280,7 +301,12 @@ export function useAddEvent() {
         {
           id: "zone-2",
           name: "Festival A (Kiri)",
-          ticketName: tickets[1]?.name || "Regular",
+          ticketName: findTicketByKeywords(
+            ticketsList,
+            ["regular", "festival", "reguler", "general"],
+            1,
+            "Regular"
+          ),
           capacity: 400,
           color: "#EC4899",
           x: 120,
@@ -292,7 +318,12 @@ export function useAddEvent() {
         {
           id: "zone-3",
           name: "Festival B (Kanan)",
-          ticketName: tickets[1]?.name || "Regular",
+          ticketName: findTicketByKeywords(
+            ticketsList,
+            ["regular", "festival", "reguler", "general"],
+            1,
+            "Regular"
+          ),
           capacity: 350,
           color: "#059669",
           x: 420,
@@ -304,7 +335,12 @@ export function useAddEvent() {
         {
           id: "zone-4",
           name: "Tribune Belakang",
-          ticketName: tickets[2]?.name || "",
+          ticketName: findTicketByKeywords(
+            ticketsList,
+            ["tribune", "tribun", "cat 2", "cat 3", "seated"],
+            2,
+            ""
+          ),
           capacity: 300,
           color: "#2563EB",
           x: 120,
@@ -319,7 +355,7 @@ export function useAddEvent() {
         {
           id: "zone-1",
           name: "VIP Center Seated",
-          ticketName: tickets[0]?.name || "VIP",
+          ticketName: findTicketByKeywords(ticketsList, ["vip"], 0, "VIP"),
           capacity: 200,
           color: "#7C3AED",
           x: 240,
@@ -331,7 +367,12 @@ export function useAddEvent() {
         {
           id: "zone-2",
           name: "CAT 1 (Tengah)",
-          ticketName: tickets[1]?.name || "Regular",
+          ticketName: findTicketByKeywords(
+            ticketsList,
+            ["cat 1", "cat-1", "regular", "festival"],
+            1,
+            "Regular"
+          ),
           capacity: 400,
           color: "#2563EB",
           x: 160,
@@ -343,7 +384,12 @@ export function useAddEvent() {
         {
           id: "zone-3",
           name: "CAT 2 (Belakang)",
-          ticketName: tickets[2]?.name || "",
+          ticketName: findTicketByKeywords(
+            ticketsList,
+            ["cat 2", "cat-2", "tribune", "tribun"],
+            2,
+            ""
+          ),
           capacity: 400,
           color: "#059669",
           x: 100,
@@ -358,7 +404,7 @@ export function useAddEvent() {
         {
           id: "zone-1",
           name: "VIP Front Ground",
-          ticketName: tickets[0]?.name || "VIP",
+          ticketName: findTicketByKeywords(ticketsList, ["vip"], 0, "VIP"),
           capacity: 300,
           color: "#7C3AED",
           x: 180,
@@ -370,7 +416,12 @@ export function useAddEvent() {
         {
           id: "zone-2",
           name: "General Festival Ground",
-          ticketName: tickets[1]?.name || "Regular",
+          ticketName: findTicketByKeywords(
+            ticketsList,
+            ["general", "festival", "regular", "reguler"],
+            1,
+            "Regular"
+          ),
           capacity: 700,
           color: "#059669",
           x: 130,
@@ -455,13 +506,6 @@ export function useAddEvent() {
     setErrorMessage("");
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setErrorMessage("Sesi login berakhir. Silakan login kembali sebagai admin.");
-        setSaving(false);
-        router.push("/auth/login");
-        return;
-      }
 
       // 1. Upload Banner Image if exists
       let bannerUrl: string | undefined;
@@ -470,7 +514,7 @@ export function useAddEvent() {
         fd.append("image", file);
         const upRes = await fetch(`${API_BASE}/api/admin/upload`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
           body: fd,
         });
         const upData = await upRes.json();
@@ -487,7 +531,7 @@ export function useAddEvent() {
         fd.append("image", customImageFile);
         const denahUp = await fetch(`${API_BASE}/api/admin/upload`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
           body: fd,
         });
         const denahData = await denahUp.json();
@@ -550,9 +594,9 @@ export function useAddEvent() {
 
       const res = await fetch(`${API_BASE}/api/admin/events`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });

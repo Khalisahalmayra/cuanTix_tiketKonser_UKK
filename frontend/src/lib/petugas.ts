@@ -23,14 +23,9 @@ export class SessionExpiredError extends Error {
   }
 }
 
-// Ganti dengan cara kamu menyimpan token login petugas.
+/** Header JSON untuk request API. Autentikasi menggunakan session cookie. */
 function authHeaders(): HeadersInit {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (typeof window !== "undefined") {
-    const token = window.localStorage.getItem("token");
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
-  return headers;
+  return { "Content-Type": "application/json" };
 }
 
 /** Profil petugas yang sedang login: nama, gate, dan jadwal shift. */
@@ -39,6 +34,7 @@ export async function getPetugasProfile(): Promise<PetugasProfile> {
 
   const res = await fetch(`${API_BASE_URL}/api/petugas/me`, {
     headers: authHeaders(),
+    credentials: "include",
     cache: "no-store",
   });
   if (res.status === 401 || res.status === 403) throw new SessionExpiredError();
@@ -56,13 +52,13 @@ export async function logoutPetugas(): Promise<void> {
       await fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: "POST",
         headers: authHeaders(),
+        credentials: "include",
       });
     }
   } catch {
     // Logout tetap lanjut walau server tidak terjangkau.
   } finally {
     try {
-      window.localStorage.removeItem("token");
       window.sessionStorage.removeItem(ONLINE_SINCE_KEY);
     } catch {
       // storage tidak tersedia — abaikan
@@ -84,6 +80,7 @@ export async function sendHelpRequest(
   const res = await fetch(`${API_BASE_URL}/api/petugas/help`, {
     method: "POST",
     headers: authHeaders(),
+    credentials: "include",
     body: JSON.stringify(payload),
   });
   if (res.status === 401 || res.status === 403) throw new SessionExpiredError();

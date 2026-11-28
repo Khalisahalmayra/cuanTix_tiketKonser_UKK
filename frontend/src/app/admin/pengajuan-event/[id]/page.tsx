@@ -53,12 +53,8 @@ export default function DetailPengajuanPage() {
   useEffect(() => {
     async function fetchDetail() {
       try {
-        const token = localStorage.getItem("token");
-
         const res = await fetch(API_URL, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         });
 
         if (!res.ok) {
@@ -134,8 +130,6 @@ export default function DetailPengajuanPage() {
       setActionLoading(true);
       setActionMessage("");
 
-      const token = localStorage.getItem("token");
-
       const endpoint =
         action === "approve"
           ? `${API_URL}/${submission.id}/approve`
@@ -151,8 +145,8 @@ export default function DetailPengajuanPage() {
 
       const res = await fetch(endpoint, {
         method: "PATCH",
+        credentials: "include",
         headers: {
-          Authorization: `Bearer ${token}`,
           ...(body ? { "Content-Type": "application/json" } : {}),
         },
         ...(body ? { body } : {}),

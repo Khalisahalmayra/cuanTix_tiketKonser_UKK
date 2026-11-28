@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -42,12 +41,8 @@ export default function PengajuanEventPage() {
   useEffect(() => {
     async function fetchSubmissions() {
       try {
-        const token = localStorage.getItem("token");
-
         const res = await fetch(API_URL, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         });
 
         if (!res.ok) {
@@ -142,14 +137,11 @@ export default function PengajuanEventPage() {
                     </td>
 
                     <td className="px-6 py-5 text-sm text-gray-600">
-                      {new Date(item.start_at).toLocaleDateString(
-                        "id-ID",
-                        {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        }
-                      )}
+                      {new Date(item.start_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
                     </td>
 
                     <td className="px-6 py-5">
@@ -158,10 +150,10 @@ export default function PengajuanEventPage() {
                           item.status === "pending_review"
                             ? "bg-yellow-100 text-yellow-700"
                             : item.status === "approved"
-                            ? "bg-green-100 text-green-700"
-                            : item.status === "rejected"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-purple-100 text-purple-700"
+                              ? "bg-green-100 text-green-700"
+                              : item.status === "rejected"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-purple-100 text-purple-700"
                         }`}
                       >
                         {statusLabels[item.status] || item.status}
@@ -169,12 +161,12 @@ export default function PengajuanEventPage() {
                     </td>
 
                     <td className="px-6 py-5">
-                    <Link
-                    href={`/admin/pengajuan-event/${item.id}`}
-                    className="rounded-lg bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200"
-                    >
-                    Lihat
-                    </Link>
+                      <Link
+                        href={`/admin/pengajuan-event/${item.id}`}
+                        className="rounded-lg bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200"
+                      >
+                        Lihat
+                      </Link>
                     </td>
                   </tr>
                 ))}

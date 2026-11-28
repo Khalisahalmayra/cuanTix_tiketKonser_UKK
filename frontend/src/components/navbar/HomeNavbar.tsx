@@ -180,17 +180,38 @@ export default function HomeNavbar() {
     tipe: "Personal",
   });
 
-  useEffect(() => {
+useEffect(() => {
+  let active = true;
+
+  async function fetchUser() {
     try {
-      const raw = localStorage.getItem("user");
-      if (raw) {
-        const data = JSON.parse(raw);
-        setUser((prev) => ({ ...prev, nama: data.name || "Pengguna" }));
+      const res = await fetch("http://localhost:4000/api/auth/me", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      if (active && data.user) {
+        setUser((prev) => ({
+          ...prev,
+          nama: data.user.name || "Pengguna",
+          tipe: data.user.role === "admin" ? "Admin" : "Personal",
+        }));
       }
-    } catch {
-      // abaikan kalau data rusak
+    } catch (error) {
+      console.error("Gagal mengambil data pengguna:", error);
     }
-  }, []);
+  }
+
+  fetchUser();
+
+  return () => {
+    active = false;
+  };
+}, []);
 
   const filteredKota: string[] = KOTA_LIST.filter((k) =>
     k.toLowerCase().includes(lokasiQuery.toLowerCase())
@@ -217,11 +238,24 @@ export default function HomeNavbar() {
   }
 
   // Dipanggil setelah user menekan "Ya, Keluar" di dialog konfirmasi
-  function confirmLogout(): void {
+async function confirmLogout(): Promise<void> {
+  try {
+    const res = await fetch("http://localhost:4000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      throw new Error("Logout gagal");
+    }
+
     setLogoutOpen(false);
-    // TODO: panggil logout (signOut / hapus token), lalu arahkan ke beranda
-    router.push("/");
+    router.replace("/");
+  } catch (error) {
+    console.error("Gagal logout:", error);
+    alert("Tidak dapat melakukan logout. Silakan coba lagi.");
   }
+}
 
   function openWebsiteChat(): void {
     closeAll();

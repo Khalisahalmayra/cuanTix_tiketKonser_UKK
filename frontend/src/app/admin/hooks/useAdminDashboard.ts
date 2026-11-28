@@ -5,17 +5,10 @@ import { AdminEvent, Submission, DashboardStats, AdminUser } from "../types";
 
 const EVENTS_API = "http://localhost:4000/api/admin/events";
 const SUBMISSIONS_API = "http://localhost:4000/api/event-submissions";
+const AUTH_API = "http://localhost:4000/api/auth/me";
 
 export function useAdminDashboard() {
-  const [adminUser] = useState<AdminUser | null>(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem("user");
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
 
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -28,21 +21,19 @@ export function useAdminDashboard() {
       setRefreshing(true);
     }
 
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (!token) {
-      setError("Sesi login berakhir. Silakan login kembali.");
-      setLoading(false);
-      setRefreshing(false);
-      return;
-    }
-
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-
-      const [eventsRes, submissionsRes] = await Promise.allSettled([
-        fetch(EVENTS_API, { headers }),
-        fetch(SUBMISSIONS_API, { headers }),
+      const [userRes, eventsRes, submissionsRes] = await Promise.allSettled([
+        fetch(AUTH_API, { credentials: "include" }),
+        fetch(EVENTS_API, { credentials: "include" }),
+        fetch(SUBMISSIONS_API, { credentials: "include" }),
       ]);
+
+      if (userRes.status === "fulfilled" && userRes.value.ok) {
+        const userData = await userRes.value.json();
+        setAdminUser(userData.user ?? userData);
+      } else {
+        setAdminUser(null);
+      }
 
       let eventsData: AdminEvent[] = [];
       let submissionsData: Submission[] = [];

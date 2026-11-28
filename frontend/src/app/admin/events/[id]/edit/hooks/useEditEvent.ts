@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useMemo, useEffect } from "react";
@@ -72,14 +73,33 @@ export function useEditEvent() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successToast, setSuccessToast] = useState("");
 
-  const applyPresetLayout = (preset: SeatingPreset) => {
+  const findTicketByKeywords = (
+    availableTickets: TicketItem[],
+    keywords: string[]
+  ): string => {
+    for (const kw of keywords) {
+      const target = kw.toLowerCase();
+      const found = availableTickets.find((t) =>
+        t.name.trim().toLowerCase().includes(target)
+      );
+      if (found && found.name.trim()) {
+        return found.name.trim();
+      }
+    }
+    return "";
+  };
+
+  const applyPresetLayout = (
+    preset: SeatingPreset,
+    ticketsList: TicketItem[] = tickets
+  ) => {
     setLayoutPreset(preset);
     if (preset === "standing_seated") {
       setZones([
         {
           id: "zone-1",
           name: "VIP Front Row",
-          ticketName: tickets[0]?.name || "VIP",
+          ticketName: findTicketByKeywords(ticketsList, ["vip"]),
           capacity: 250,
           color: "#7C3AED",
           x: 230,
@@ -91,7 +111,7 @@ export function useEditEvent() {
         {
           id: "zone-2",
           name: "Festival A (Kiri)",
-          ticketName: tickets[1]?.name || "Regular",
+          ticketName: findTicketByKeywords(ticketsList, ["regular", "reguler"]),
           capacity: 400,
           color: "#EC4899",
           x: 120,
@@ -103,7 +123,7 @@ export function useEditEvent() {
         {
           id: "zone-3",
           name: "Festival B (Kanan)",
-          ticketName: tickets[1]?.name || "Regular",
+          ticketName: findTicketByKeywords(ticketsList, ["regular", "reguler"]),
           capacity: 350,
           color: "#059669",
           x: 420,
@@ -115,7 +135,7 @@ export function useEditEvent() {
         {
           id: "zone-4",
           name: "Tribune Belakang",
-          ticketName: tickets[2]?.name || "",
+          ticketName: findTicketByKeywords(ticketsList, ["tribune", "tribun"]),
           capacity: 300,
           color: "#2563EB",
           x: 120,
@@ -130,7 +150,7 @@ export function useEditEvent() {
         {
           id: "zone-1",
           name: "VIP Center Seated",
-          ticketName: tickets[0]?.name || "VIP",
+          ticketName: findTicketByKeywords(ticketsList, ["vip"]),
           capacity: 200,
           color: "#7C3AED",
           x: 240,
@@ -142,7 +162,7 @@ export function useEditEvent() {
         {
           id: "zone-2",
           name: "CAT 1 (Tengah)",
-          ticketName: tickets[1]?.name || "Regular",
+          ticketName: findTicketByKeywords(ticketsList, ["cat 1", "cat-1"]),
           capacity: 400,
           color: "#2563EB",
           x: 160,
@@ -154,7 +174,7 @@ export function useEditEvent() {
         {
           id: "zone-3",
           name: "CAT 2 (Belakang)",
-          ticketName: tickets[2]?.name || "",
+          ticketName: findTicketByKeywords(ticketsList, ["cat 2", "cat-2"]),
           capacity: 400,
           color: "#059669",
           x: 100,
@@ -169,7 +189,7 @@ export function useEditEvent() {
         {
           id: "zone-1",
           name: "VIP Front Ground",
-          ticketName: tickets[0]?.name || "VIP",
+          ticketName: findTicketByKeywords(ticketsList, ["vip"]),
           capacity: 300,
           color: "#7C3AED",
           x: 180,
@@ -181,7 +201,11 @@ export function useEditEvent() {
         {
           id: "zone-2",
           name: "General Festival Ground",
-          ticketName: tickets[1]?.name || "Regular",
+          ticketName: findTicketByKeywords(ticketsList, [
+            "general",
+            "regular",
+            "reguler",
+          ]),
           capacity: 700,
           color: "#059669",
           x: 130,
@@ -197,13 +221,12 @@ export function useEditEvent() {
   // Load existing event data on mount
   useEffect(() => {
     if (!eventId) return;
-    const token = localStorage.getItem("token");
 
     async function fetchEvent() {
       try {
         setLoading(true);
         const res = await fetch(`${API_BASE}/api/admin/events/${eventId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         });
         const data = await res.json();
         if (!res.ok) {
@@ -223,8 +246,9 @@ export function useEditEvent() {
         setCurrentStatus(data.status || "published");
 
         // Format tickets
+        let loadedTickets: TicketItem[] = [];
         if (Array.isArray(data.ticket_types)) {
-          const loadedTickets: TicketItem[] = data.ticket_types.map(
+          loadedTickets = data.ticket_types.map(
             (
               t: {
                 id?: number | string;
@@ -265,7 +289,7 @@ export function useEditEvent() {
           if (sl.image_url) setCustomLayoutImage(sl.image_url);
         } else {
           // Inisialisasi layout default jika event lama belum punya seating layout
-          applyPresetLayout("standing_seated");
+          applyPresetLayout("standing_seated", loadedTickets);
         }
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -421,7 +445,7 @@ export function useEditEvent() {
     const newZone: SeatingZone = {
       id: newId,
       name: `Zona Baru ${zones.length + 1}`,
-      ticketName: tickets[0]?.name || "",
+      ticketName: "",
       capacity: 100,
       color: ZONE_COLORS[zones.length % ZONE_COLORS.length].hex,
       x: 150 + ((zones.length * 30) % 200),
@@ -492,14 +516,6 @@ export function useEditEvent() {
     setErrorMessage("");
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setErrorMessage("Sesi login berakhir. Silakan login kembali sebagai admin.");
-        setSaving(false);
-        router.push("/auth/login");
-        return;
-      }
-
       // 1. Upload Poster Baru jika dipilih
       let bannerUrl = currentBanner;
       if (file) {
@@ -507,7 +523,7 @@ export function useEditEvent() {
         fd.append("image", file);
         const upRes = await fetch(`${API_BASE}/api/admin/upload`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
           body: fd,
         });
         const upData = await upRes.json();
@@ -524,7 +540,7 @@ export function useEditEvent() {
         fd.append("image", customImageFile);
         const denahUp = await fetch(`${API_BASE}/api/admin/upload`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
           body: fd,
         });
         const denahData = await denahUp.json();
@@ -590,8 +606,8 @@ export function useEditEvent() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 

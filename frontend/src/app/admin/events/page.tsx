@@ -21,60 +21,61 @@ export default function AdminEventsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const getToken = () => localStorage.getItem("token");
 
-  const loadEvents = async () => {
-    try {
-      const res = await fetch(API, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal memuat event");
-      setEvents(data);
-      setError("");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal memuat event");
-    } finally {
-      setLoading(false);
-    }
-  };
+
+const loadEvents = async () => {
+  try {
+    const res = await fetch(API, {
+      credentials: "include",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal memuat event");
+    setEvents(data);
+    setError("");
+  } catch (e) {
+    setError(e instanceof Error ? e.message : "Gagal memuat event");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     loadEvents();
   }, []);
 
-  const changeStatus = async (id: number, status: string) => {
-    const res = await fetch(`${API}/${id}/status`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify({ status }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message || "Gagal mengubah status");
-      return;
-    }
-    loadEvents();
-  };
+const changeStatus = async (id: number, status: string) => {
+  const res = await fetch(`${API}/${id}/status`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ status }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.message || "Gagal mengubah status");
+    return;
+  }
+  loadEvents();
+};
 
-  const deleteEvent = async (id: number, title: string) => {
-    if (!confirm(`Hapus event "${title}"? Tindakan ini tidak bisa dibatalkan.`)) {
-      return;
-    }
-    const res = await fetch(`${API}/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message || "Gagal menghapus event");
-      return;
-    }
-    loadEvents();
-  };
+const deleteEvent = async (id: number, title: string) => {
+  if (!confirm(`Hapus event "${title}"? Tindakan ini tidak bisa dibatalkan.`)) {
+    return;
+  }
+
+  const res = await fetch(`${API}/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.message || "Gagal menghapus event");
+    return;
+  }
+  loadEvents();
+};
 
   return (
     <div>

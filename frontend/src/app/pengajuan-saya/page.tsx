@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -56,22 +55,16 @@ export default function PengajuanSayaPage() {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          setError("Silakan login terlebih dahulu.");
-          return;
-        }
-
         const response = await fetch(`${API_URL}/my`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         });
 
         const data = await response.json();
 
         if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Silakan login terlebih dahulu.");
+          }
           throw new Error(data.message || "Gagal mengambil data pengajuan.");
         }
 

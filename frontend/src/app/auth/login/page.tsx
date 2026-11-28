@@ -44,41 +44,41 @@ export default function LoginPage() {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
 
-    if (!form.email || !form.password) {
-      setError("Email dan password wajib diisi.");
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+
+  if (!form.email || !form.password) {
+    setError("Email dan password wajib diisi.");
+    return;
+  }
+
+  try {
+    setIsSubmitting(true);
+
+    const res = await fetch("http://localhost:4000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.message || "Email atau password salah.");
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-
-      const res = await fetch("http://localhost:4000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Email atau password salah.");
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      window.location.href = data.user.role === "admin" ? "/admin" : "/home";
-    } catch {
-      setError("Tidak bisa terhubung ke server.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    window.location.href =
+      data.user.role === "admin" ? "/admin" : "/home";
+  } catch {
+    setError("Tidak bisa terhubung ke server.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleGoogleLogin = async () => {
     try {

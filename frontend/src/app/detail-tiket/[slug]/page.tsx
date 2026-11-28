@@ -1,12 +1,17 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import LandingNavbar from "@/components/navbar/LandingNavbar";
 import HomeNavbar from "@/components/navbar/HomeNavbar";
 import GradientIcon from "@/components/icon/GradientIcon";
 import EventBanner from "@/components/banner/EventBanner";
 import WishlistButton from "@/components/wishlist/WishlistButton";
 import EventDescription from "@/components/event-detail/EventDescription";
+import EventSeatingViewer, {
+  SeatingLayout,
+} from "@/components/event-detail/EventSeatingViewer";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -34,8 +39,8 @@ type EventDetail = {
   category: string;
   organizer: string;
   tickets: TicketType[];
-  // Belum dikirim backend. Kalau nanti ditambahkan, otomatis tampil.
   denah?: string | null;
+  seating_layout?: SeatingLayout | null;
   terms?: string[] | null;
 };
 
@@ -67,17 +72,49 @@ function formatEventDate(iso: string): string {
   return `${tanggal} - ${jam} WIB`;
 }
 
+
+
 export default function DetailTiketPage() {
   const router = useRouter();
   const params = useParams();
   const slug = params?.slug as string;
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+useEffect(() => {
+  let cancelled = false;
+
+  async function checkSession() {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/me`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!cancelled) {
+        setIsLoggedIn(res.ok);
+      }
+    } catch {
+      if (!cancelled) setIsLoggedIn(false);
+    }
+  }
+
+  checkSession();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<"notfound" | "failed" | null>(null);
 
   const [showAll, setShowAll] = useState(false);
   const [activeTab, setActiveTab] = useState("kategori");
+  const [selectedTicketName, setSelectedTicketName] = useState<string | null>(null);
+  const [hoveredTicketName, setHoveredTicketName] = useState<string | null>(null);
+
+  const activeHighlight = hoveredTicketName || selectedTicketName;
 
   useEffect(() => {
     if (!slug) return;
@@ -120,7 +157,7 @@ export default function DetailTiketPage() {
   if (loading || error || !event) {
     return (
       <main className="min-h-screen bg-white text-black">
-        <HomeNavbar />
+        {isLoggedIn ? <HomeNavbar /> : <LandingNavbar />}
         <div className="mx-auto flex max-w-[600px] flex-col items-center gap-3 px-6 py-24 text-center">
           {loading ? (
             <p className="text-sm text-gray-500">Memuat detail event…</p>
@@ -138,7 +175,7 @@ export default function DetailTiketPage() {
                   : "Periksa koneksi atau pastikan server backend sedang berjalan."}
               </p>
               <button
-                onClick={() => router.push("/home")}
+                onClick={() => router.push(isLoggedIn ? "/home" : "/")}
                 className="mt-2 h-[36px] rounded-full px-8 text-[13px] font-semibold text-white shadow-md transition-opacity hover:opacity-90"
                 style={{ background: "#EC407A" }}
               >
@@ -173,7 +210,7 @@ export default function DetailTiketPage() {
   return (
     <main className="min-h-screen bg-white text-black">
       {/* ================= NAVBAR ================= */}
-      <HomeNavbar />
+      {isLoggedIn ? <HomeNavbar /> : <LandingNavbar />}
 
       {/* BANNER EVENT */}
       <EventBanner
@@ -192,11 +229,10 @@ export default function DetailTiketPage() {
             <button
               key={tab.id}
               onClick={() => scrollToSection(tab.id)}
-              className={`whitespace-nowrap border-b-2 px-2 py-4 text-sm font-bold transition md:text-base ${
-                activeTab === tab.id
-                  ? "border-pink-500 text-pink-600"
-                  : "border-transparent text-purple-800 hover:text-pink-500"
-              }`}
+              className={`whitespace-nowrap border-b-2 px-2 py-4 text-sm font-bold transition md:text-base ${activeTab === tab.id
+                ? "border-pink-500 text-pink-600"
+                : "border-transparent text-purple-800 hover:text-pink-500"
+                }`}
             >
               {tab.label}
             </button>
@@ -222,17 +258,19 @@ export default function DetailTiketPage() {
               Kategori & Harga
             </h2>
 
-            {event.denah ? (
-              <img
-                src={event.denah}
-                alt={`Denah kategori tempat duduk ${event.title}`}
-                className="mx-auto w-full max-w-[520px] rounded-sm object-contain"
-              />
-            ) : (
-              <p className="text-[15px] text-gray-600">
-                Pilih kategori tiket yang tersedia di panel sebelah kanan.
-              </p>
-            )}
+            <EventSeatingViewer
+              seatingLayout={event.seating_layout}
+              denahUrl={event.denah}
+              eventTitle={event.title}
+              highlightedTicketName={activeHighlight}
+              onSelectTicketName={(ticketName) =>
+                setSelectedTicketName((prev) =>
+                  prev?.trim().toLowerCase() === ticketName.trim().toLowerCase()
+                    ? null
+                    : ticketName
+                )
+              }
+            />
           </section>
 
           {/* ================= SYARAT & KETENTUAN ================= */}
@@ -392,10 +430,27 @@ export default function DetailTiketPage() {
               {visibleTickets.map((ticket) => {
                 const available = Math.max(0, ticket.available);
                 const soldOut = available === 0;
+                const isHighlighted =
+                  activeHighlight?.trim().toLowerCase() ===
+                  ticket.name.trim().toLowerCase();
+
                 return (
                   <div
                     key={ticket.id}
-                    className="grid grid-cols-[105px_minmax(0,1fr)_88px] items-center gap-2 border-b border-gray-400 px-3 py-4 md:grid-cols-[120px_minmax(0,1fr)_95px] md:px-4"
+                    onMouseEnter={() => setHoveredTicketName(ticket.name)}
+                    onMouseLeave={() => setHoveredTicketName(null)}
+                    onClick={() =>
+                      setSelectedTicketName((prev) =>
+                        prev?.trim().toLowerCase() === ticket.name.trim().toLowerCase()
+                          ? null
+                          : ticket.name
+                      )
+                    }
+                    className={`grid grid-cols-[105px_minmax(0,1fr)_88px] items-center gap-2 border-b border-gray-400 px-3 py-4 transition-colors duration-150 md:grid-cols-[120px_minmax(0,1fr)_95px] md:px-4 cursor-pointer ${
+                      isHighlighted
+                        ? "bg-purple-100/70 ring-2 ring-inset ring-[#7C3AED]"
+                        : ""
+                    }`}
                   >
                     {/* HARGA */}
                     <p className="text-sm font-medium">{formatPrice(ticket.price)}</p>
@@ -410,11 +465,12 @@ export default function DetailTiketPage() {
 
                     {/* STATUS */}
                     <button
-                      onClick={() =>
+                      onClick={(e) => {
+                        e.stopPropagation();
                         router.push(
                           `/checkout?event=${encodeURIComponent(event.slug)}&ticketId=${ticket.id}&ticket=${encodeURIComponent(ticket.name)}`
-                        )
-                      }
+                        );
+                      }}
                       disabled={soldOut}
                       className="rounded-full border border-purple-400 bg-pink-50 px-2 py-2 text-xs font-medium text-pink-600 transition hover:bg-purple-100 disabled:cursor-not-allowed disabled:opacity-50"
                     >

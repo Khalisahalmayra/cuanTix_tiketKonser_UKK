@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,6 +13,9 @@ import {
   LogOut,
 } from "lucide-react";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
 export default function AdminLayout({
   children,
 }: {
@@ -22,28 +26,53 @@ export default function AdminLayout({
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const token = localStorage.getItem("token");
-        const user = JSON.parse(localStorage.getItem("user") || "null");
+    let active = true;
 
-        if (!token || !user || user.role !== "admin") {
+    const checkAdmin = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
           router.replace("/auth/login");
           return;
         }
-        setAllowed(true);
+
+        const data = await response.json();
+        const user = data.user ?? data;
+
+        if (user.role !== "admin") {
+          router.replace("/auth/login");
+          return;
+        }
+
+        if (active) setAllowed(true);
       } catch {
         router.replace("/auth/login");
       }
-    }, 0);
+    };
 
-    return () => clearTimeout(timer);
+    checkAdmin();
+
+    return () => {
+      active = false;
+    };
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.replace("/auth/login");
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Gagal logout:", error);
+    } finally {
+      router.replace("/auth/login");
+      router.refresh();
+    }
   };
 
   if (!allowed) {
@@ -51,7 +80,9 @@ export default function AdminLayout({
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
-          <p className="text-xs font-medium text-slate-500">Memverifikasi akses admin...</p>
+          <p className="text-xs font-medium text-slate-500">
+            Memverifikasi akses admin...
+          </p>
         </div>
       </div>
     );
@@ -64,10 +95,8 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-slate-50/70 text-slate-900">
-      {/* Sidebar Admin CuanTix */}
       <aside className="w-64 shrink-0 bg-[#2D1065] text-white flex flex-col justify-between border-r border-purple-950/40">
         <div className="p-5">
-          {/* Brand & Logo Header */}
           <div className="mb-8 flex items-center gap-3 px-1">
             <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-white p-1 shadow-sm">
               <Image
@@ -89,57 +118,63 @@ export default function AdminLayout({
             </div>
           </div>
 
-          {/* Navigasi Utama */}
           <nav className="space-y-1.5 text-xs font-semibold">
-            {/* Dashboard */}
             <Link
               href="/admin/dashboard"
-              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition-all ${isDashboardActive
-                ? "bg-purple-600/35 text-white font-bold shadow-xs border-l-4 border-[#7C3AED]"
-                : "text-purple-200/70 hover:bg-white/10 hover:text-white border-l-4 border-transparent"
-                }`}
+              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition-all ${
+                isDashboardActive
+                  ? "bg-purple-600/35 text-white font-bold shadow-xs border-l-4 border-[#7C3AED]"
+                  : "text-purple-200/70 hover:bg-white/10 hover:text-white border-l-4 border-transparent"
+              }`}
             >
               <LayoutDashboard
-                className={`h-4 w-4 shrink-0 ${isDashboardActive ? "text-purple-300" : "text-purple-300/70"
-                  }`}
+                className={`h-4 w-4 shrink-0 ${
+                  isDashboardActive
+                    ? "text-purple-300"
+                    : "text-purple-300/70"
+                }`}
               />
               <span>Dashboard</span>
             </Link>
 
-            {/* Kelola Event */}
             <Link
               href="/admin/events"
-              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition-all ${isEventsActive
-                ? "bg-purple-600/35 text-white font-bold shadow-xs border-l-4 border-[#7C3AED]"
-                : "text-purple-200/70 hover:bg-white/10 hover:text-white border-l-4 border-transparent"
-                }`}
+              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition-all ${
+                isEventsActive
+                  ? "bg-purple-600/35 text-white font-bold shadow-xs border-l-4 border-[#7C3AED]"
+                  : "text-purple-200/70 hover:bg-white/10 hover:text-white border-l-4 border-transparent"
+              }`}
             >
               <Calendar
-                className={`h-4 w-4 shrink-0 ${isEventsActive ? "text-purple-300" : "text-purple-300/70"
-                  }`}
+                className={`h-4 w-4 shrink-0 ${
+                  isEventsActive
+                    ? "text-purple-300"
+                    : "text-purple-300/70"
+                }`}
               />
               <span>Kelola Event</span>
             </Link>
 
-            {/* Pengajuan Event */}
             <Link
               href="/admin/pengajuan-event"
-              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition-all ${isSubmissionsActive
-                ? "bg-purple-600/35 text-white font-bold shadow-xs border-l-4 border-[#7C3AED]"
-                : "text-purple-200/70 hover:bg-white/10 hover:text-white border-l-4 border-transparent"
-                }`}
+              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition-all ${
+                isSubmissionsActive
+                  ? "bg-purple-600/35 text-white font-bold shadow-xs border-l-4 border-[#7C3AED]"
+                  : "text-purple-200/70 hover:bg-white/10 hover:text-white border-l-4 border-transparent"
+              }`}
             >
               <FileCheck2
-                className={`h-4 w-4 shrink-0 ${isSubmissionsActive ? "text-purple-300" : "text-purple-300/70"
-                  }`}
+                className={`h-4 w-4 shrink-0 ${
+                  isSubmissionsActive
+                    ? "text-purple-300"
+                    : "text-purple-300/70"
+                }`}
               />
               <span>Pengajuan Event</span>
             </Link>
 
-            {/* Pemisah */}
             <div className="my-4 border-t border-purple-800/40" />
 
-            {/* Lihat Situs */}
             <Link
               href="/home"
               className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-purple-200/70 hover:bg-white/10 hover:text-white transition-all border-l-4 border-transparent"
@@ -150,7 +185,6 @@ export default function AdminLayout({
           </nav>
         </div>
 
-        {/* Footer Sidebar: Tombol Logout */}
         <div className="p-5 border-t border-purple-800/40">
           <button
             type="button"
@@ -163,8 +197,9 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* Konten Halaman Admin */}
-      <main className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+        {children}
+      </main>
     </div>
   );
 }

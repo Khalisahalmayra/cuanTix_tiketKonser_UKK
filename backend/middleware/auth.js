@@ -1,27 +1,24 @@
-const jwt = require("jsonwebtoken");
 
-// Cek apakah request membawa token yang valid
+ // Middleware untuk memeriksa session login
 function verifyToken(req, res, next) {
-  const header = req.headers.authorization || "";
-  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-
-  if (!token) {
-    return res.status(401).json({ message: "Token tidak ada, silakan login" });
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({
+      message: "Belum login, silakan login terlebih dahulu",
+    });
   }
 
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch {
-    return res.status(401).json({ message: "Token tidak valid atau kedaluwarsa" });
-  }
+  req.user = req.session.user;
+  next();
 }
 
-// Cek apakah role-nya admin
+// Middleware untuk memeriksa role admin
 function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== "admin") {
-    return res.status(403).json({ message: "Hanya admin yang boleh mengakses ini" });
+    return res.status(403).json({
+      message: "Hanya admin yang boleh mengakses ini",
+    });
   }
+
   next();
 }
 

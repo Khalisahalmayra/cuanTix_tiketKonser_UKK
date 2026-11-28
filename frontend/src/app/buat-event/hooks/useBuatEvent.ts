@@ -14,14 +14,37 @@ export function useBuatEvent() {
   // Multi-step State (1: Info Event, 2: Jadwal & Lokasi, 3: Jenis Tiket, 4: Review)
   const [currentStep, setCurrentStep] = useState<StepNumber>(1);
 
-  // Authentication State
-  const [token] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("token");
-    }
-    return null;
-  });
+  // Authentication State (session cookie)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkSession() {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/me`, {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          if (isMounted) setIsAuthenticated(false);
+          return;
+        }
+
+        const data = await res.json();
+        if (isMounted) setIsAuthenticated(Boolean(data.user));
+      } catch {
+        if (isMounted) setIsAuthenticated(false);
+      }
+    }
+
+    checkSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Categories State
   const [categories, setCategories] = useState<Category[]>(FALLBACK_CATEGORIES);
@@ -338,13 +361,7 @@ export function useBuatEvent() {
   const handleSubmitProposal = async () => {
     setSubmitError(null);
 
-    // 1. Validasi Autentikasi
-    const activeToken = token || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
-    if (!activeToken) {
-      setShowAuthModal(true);
-      return;
-    }
-
+    // 1. Validasi autentikasi dilakukan oleh backend melalui session cookie.
     // 2. Validasi Seluruh Step
     if (!validateStep1()) {
       setCurrentStep(1);
@@ -403,8 +420,8 @@ export function useBuatEvent() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${activeToken}`,
         },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 
@@ -486,7 +503,7 @@ export function useBuatEvent() {
     handleStepClick,
 
     // Auth
-    token,
+    token: isAuthenticated,
     showAuthModal,
     setShowAuthModal,
 
